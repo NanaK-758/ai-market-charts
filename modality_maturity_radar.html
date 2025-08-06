@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>モダリティ別市場成熟度分析</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .chart-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .chart-subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        canvas {
+            max-height: 500px;
+        }
+        .metrics-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .metric-item {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        .metric-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <h2 class="chart-title">モダリティ別市場成熟度分析</h2>
+        <p class="chart-subtitle">技術成熟度・競争環境・ROI評価</p>
+        <canvas id="maturityRadar"></canvas>
+        
+        <div class="metrics-legend">
+            <div class="metric-item">
+                <div class="metric-color" style="background-color: rgba(54, 162, 235, 0.6);"></div>
+                <span><strong>技術成熟度</strong> - 技術的安定性・品質</span>
+            </div>
+            <div class="metric-item">
+                <div class="metric-color" style="background-color: rgba(255, 99, 132, 0.6);"></div>
+                <span><strong>市場競争度</strong> - プレイヤー数・競争激化</span>
+            </div>
+            <div class="metric-item">
+                <div class="metric-color" style="background-color: rgba(75, 192, 192, 0.6);"></div>
+                <span><strong>ROI・実用性</strong> - ビジネス価値・導入効果</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('maturityRadar').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: [
+                    'テキスト・対話型AI',
+                    '画像生成',
+                    'コード生成',
+                    'AI検索',
+                    '動画生成',
+                    '音声合成',
+                    '音楽生成'
+                ],
+                datasets: [
+                    {
+                        label: '技術成熟度',
+                        data: [95, 85, 90, 70, 60, 80, 45],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                    },
+                    {
+                        label: '市場競争度',
+                        data: [95, 85, 75, 55, 70, 60, 50],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                    },
+                    {
+                        label: 'ROI・実用性',
+                        data: [80, 70, 95, 75, 40, 65, 30],
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(75, 192, 192, 1)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.r + '/100';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        grid: {
+                            circular: true,
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 11,
+                                weight: 'bold'
+                            }
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: {
+                            stepSize: 20,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+    </script>
+</body>
+</html>

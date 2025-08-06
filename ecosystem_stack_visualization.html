@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成AIエコシステム・スタック</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .stack {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 15px;
+            height: 500px;
+            justify-content: space-between;
+        }
+        .layer {
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .layer:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        .layer1 {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            height: 80px;
+        }
+        .layer2 {
+            background: linear-gradient(135deg, #4834d4, #686de0);
+            height: 90px;
+        }
+        .layer3 {
+            background: linear-gradient(135deg, #00d2d3, #54a0ff);
+            height: 100px;
+        }
+        .layer4 {
+            background: linear-gradient(135deg, #5f27cd, #a55eea);
+            height: 120px;
+        }
+        .layer-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .layer-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        .layer-content {
+            font-size: 11px;
+            line-height: 1.4;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .company-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .market-info {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            text-align: right;
+            font-size: 11px;
+        }
+        .market-size {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            margin: 10px 0;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🧠 生成AIエコシステム・スタック</h1>
+        
+        <div class="stack">
+            <div class="layer layer1">
+                <div class="market-info">
+                    <div class="market-size">$125B</div>
+                    <div>GPU市場</div>
+                </div>
+                <div class="layer-title">第1層：基盤インフラストラクチャ</div>
+                <div class="layer-subtitle">The Bedrock - 物理的ハードウェアとクラウド</div>
+                <div class="layer-content">
+                    <span class="company-tag">NVIDIA (92%)</span>
+                    <span class="company-tag">AMD</span>
+                    <span class="company-tag">AWS</span>
+                    <span class="company-tag">Azure</span>
+                    <span class="company-tag">GCP</span>
+                </div>
+            </div>
+            
+            <div class="arrow">↑</div>
+            
+            <div class="layer layer2">
+                <div class="market-info">
+                    <div class="market-size">寡占化</div>
+                    <div>5-6社</div>
+                </div>
+                <div class="layer-title">第2層：基盤モデル</div>
+                <div class="layer-subtitle">The Brains - 大規模言語モデル・拡散モデル</div>
+                <div class="layer-content">
+                    <span class="company-tag">OpenAI</span>
+                    <span class="company-tag">Google</span>
+                    <span class="company-tag">Anthropic</span>
+                    <span class="company-tag">Meta (Llama)</span>
+                    <span class="company-tag">Stability AI</span>
+                </div>
+            </div>
+            
+            <div class="arrow">↑</div>
+            
+            <div class="layer layer3">
+                <div class="market-info">
+                    <div class="market-size">成長中</div>
+                    <div>ミドルウェア</div>
+                </div>
+                <div class="layer-title">第3層：開発者プラットフォーム</div>
+                <div class="layer-subtitle">The Toolkit - フレームワーク・MLOps・オーケストレーション</div>
+                <div class="layer-content">
+                    <span class="company-tag">LangChain</span>
+                    <span class="company-tag">LlamaIndex</span>
+                    <span class="company-tag">Hugging Face</span>
+                    <span class="company-tag">Dify.AI</span>
+                    <span class="company-tag">W&B</span>
+                    <span class="company-tag">Replit</span>
+                </div>
+            </div>
+            
+            <div class="arrow">↑</div>
+            
+            <div class="layer layer4">
+                <div class="market-info">
+                    <div class="market-size">Red Ocean</div>
+                    <div>数千のツール</div>
+                </div>
+                <div class="layer-title">第4層：アプリケーション層</div>
+                <div class="layer-subtitle">The Interface - エンドユーザー向けツール・サービス</div>
+                <div class="layer-content">
+                    <span class="company-tag">ChatGPT</span>
+                    <span class="company-tag">Midjourney</span>
+                    <span class="company-tag">Canva</span>
+                    <span class="company-tag">Jasper</span>
+                    <span class="company-tag">Claude</span>
+                    <span class="company-tag">GitHub Copilot</span>
+                    <span class="company-tag">Perplexity</span>
+                    <span class="company-tag">...数千のツール</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // レイヤーのホバーエフェクトとアニメーション
+        document.querySelectorAll('.layer').forEach((layer, index) => {
+            layer.style.animationDelay = `${index * 0.2}s`;
+            layer.style.animation = 'slideUp 0.8s ease forwards';
+        });
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

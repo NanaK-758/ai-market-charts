@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戦略的ポジショニング・マトリックス</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .chart-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        canvas {
+            max-height: 500px;
+        }
+        .quadrant-labels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+        .quadrant {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+        .q1 { background: linear-gradient(45deg, #667eea, #764ba2); }
+        .q2 { background: linear-gradient(45deg, #f093fb, #f5576c); }
+        .q3 { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+        .q4 { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <h2 class="chart-title">AI市場 戦略的ポジショニング・マトリックス</h2>
+        <canvas id="positioningChart"></canvas>
+        
+        <div class="quadrant-labels">
+            <div class="quadrant q2">
+                <strong>企業向けアプリケーション</strong><br>
+                Jasper, Synthesia, Abridge
+            </div>
+            <div class="quadrant q1">
+                <strong>企業向けインフラ</strong><br>
+                NVIDIA, Microsoft Azure, OpenAI API
+            </div>
+            <div class="quadrant q3">
+                <strong>個人向けアプリケーション</strong><br>
+                ChatGPT, Midjourney, Character.AI
+            </div>
+            <div class="quadrant q4">
+                <strong>開発者プラットフォーム</strong><br>
+                Hugging Face, LangChain, Dify.AI
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('positioningChart').getContext('2d');
+        
+        const companies = [
+            {name: 'NVIDIA', x: 85, y: 15, color: '#e74c3c'},
+            {name: 'OpenAI', x: 60, y: 25, color: '#e74c3c'},
+            {name: 'Google', x: 65, y: 30, color: '#e74c3c'},
+            {name: 'Microsoft', x: 70, y: 20, color: '#e74c3c'},
+            {name: 'Hugging Face', x: 25, y: 45, color: '#3498db'},
+            {name: 'LangChain', x: 30, y: 50, color: '#3498db'},
+            {name: 'W&B', x: 60, y: 55, color: '#3498db'},
+            {name: 'ChatGPT', x: 45, y: 75, color: '#f39c12'},
+            {name: 'Midjourney', x: 20, y: 85, color: '#f39c12'},
+            {name: 'Canva', x: 50, y: 80, color: '#f39c12'},
+            {name: 'Claude', x: 55, y: 78, color: '#f39c12'},
+            {name: 'GitHub Copilot', x: 65, y: 85, color: '#f39c12'},
+            {name: 'Jasper', x: 80, y: 88, color: '#9b59b6'},
+            {name: 'Synthesia', x: 85, y: 82, color: '#9b59b6'},
+            {name: 'DeepL', x: 75, y: 90, color: '#9b59b6'}
+        ];
+
+        const datasets = companies.map(company => ({
+            label: company.name,
+            data: [{x: company.x, y: company.y}],
+            backgroundColor: company.color,
+            borderColor: company.color,
+            pointRadius: 8,
+            pointHoverRadius: 10,
+            showLine: false
+        }));
+
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return tooltipItems[0].dataset.label;
+                            },
+                            label: function(context) {
+                                const x = context.parsed.x > 50 ? '企業向け' : '個人・開発者向け';
+                                const y = context.parsed.y > 50 ? 'アプリケーション層' : 'インフラ・基盤層';
+                                return `${x} / ${y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: '個人・開発者 ← → 企業・B2B',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: function(context) {
+                                return context.tick.value === 50 ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)';
+                            },
+                            lineWidth: function(context) {
+                                return context.tick.value === 50 ? 2 : 1;
+                            }
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'インフラ・基盤 ← → アプリケーション',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: function(context) {
+                                return context.tick.value === 50 ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)';
+                            },
+                            lineWidth: function(context) {
+                                return context.tick.value === 50 ? 2 : 1;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutBounce'
+                }
+            }
+        });
+    </script>
+</body>
+</html>
