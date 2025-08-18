@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブAIワークショップ実行ガイド (Gemini API搭載版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: このSPAは、ワークショップ主催者のための「インタラクティブ実行ガイド」として設計されています。静的なレポートを単に表示するのではなく、ワークショップの実際の流れに沿った時系列のナビゲーション（タイムライン形式）を採用しました。ユーザー（主催者）はタイムラインをクリックすることで、各フェーズの詳細なスクリプト、デモ手順、コピー可能なプロンプトに直感的にアクセスできます。このタスク指向の構造は、計画の理解を深め、本番でのスムーズな進行を直接支援することを目的としています。Gemini APIを統合し、プロンプト生成とフィードバック分析を自動化する機能を追加しました。 -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: ワークショップの30分間の流れ -> Goal: 進行のガイド -> Viz/Method: クリック可能なタイムラインタブ -> Interaction: クリックで該当セクション表示 -> Justification: 実際の時間経過とアプリの操作を一致させ、主催者にとって直感的で使いやすいナビゲーションを提供するため。
+        - Report Info: GeminiとNotion AIのサンプルプロンプト -> Goal: 実践の促進 -> Viz/Method: 整形済みコードブロックとコピーボタン -> Interaction: ボタンクリックでプロンプトをクリップボードにコピー -> Justification: デモ中のミスを減らし、参加者への共有を容易にするための実用的な機能。
+        - Report Info: 事後アンケートと今後の展開 -> Goal: 成果の可可化と次への期待醸成 -> Viz/Method: Chart.jsによる棒グラフ（想定結果） -> Interaction: ホバーで詳細ツールチップ表示 -> Justification: アンケートから得られるデータがどのように次回の計画に繋がるかを視覚的に示し、データ駆動型アプローチの重要性を強調するため。
+        - New Feature: プロンプト自動生成 -> Goal: ワークショップ準備の効率化 -> Method: Gemini API呼び出し -> Interaction: シナリオ入力とボタンクリックでプロンプトを動的生成 -> Justification: 主催者が様々な状況に応じた高品質なプロンプトを即座に準備できるようにするため。
+        - New Feature: フィードバック分析 -> Goal: 次回企画の質向上 -> Method: Gemini API呼び出し -> Interaction: 自由記述フィードバックの入力とボタンクリックで要約と提案を生成 -> Justification: 定性的なフィードバックから迅速にインサイトを抽出し、データ駆動での改善サイクルを加速させるため。
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .tab-active {
+            border-color: #4A90E2;
+            color: #4A90E2;
+            background-color: #EAF2FB;
+        }
+        .tab-inactive {
+            border-color: #E9ECEF;
+            color: #6C757D;
+        }
+        .content-panel {
+            display: none;
+        }
+        .content-panel.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .prompt-card {
+            background-color: #2D3748;
+            color: #F7FAFC;
+            font-family: monospace;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #4A5568;
+            color: #E2E8F0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #2D3748;
+        }
+        .section-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E9ECEF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .section-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+        .gemini-btn {
+            background-color: #4A90E2;
+            color: white;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        .gemini-btn:hover {
+            background-color: #357ABD;
+        }
+        .gemini-btn:disabled {
+            background-color: #A0AEC0;
+            cursor: not-allowed;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A90E2;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">社内AIワークショップ実行ガイド</h1>
+                    <p class="text-sm text-gray-500">導入から定着への戦略的ブループリント (Gemini API搭載)</p>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#strategy" class="text-gray-600 hover:text-blue-600 transition">戦略</a>
+                    <a href="#blueprint" class="text-gray-600 hover:text-blue-600 transition">設計図</a>
+                    <a href="#resources" class="text-gray-600 hover:text-blue-600 transition">リソース</a>
+                    <a href="#measurement" class="text-gray-600 hover:text-blue-600 transition">成功の測定</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="strategy" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Part 1: 戦略的フレームワーク</h2>
+            <p class="text-lg text-gray-600 mb-8">「行動喚起（アクティベーション）」を促すための基本設計。目標はトレーニングではなく、最初の心理的障壁を取り除くことです。</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-blue-700">🎯 主要目標：「空白のページ問題」の克服</h3>
+                    <p class="text-gray-700">最大の障害は、ユーザーが最初に何を尋ねればよいか分からないという不確実性です。このワークショップでは、「失敗しようがない」プロンプトを提供し、意図的に「最初の成功体験」を作り出すことで、心理的な参入障壁を限りなくゼロに近づけます。</p>
+                </div>
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-blue-700">📊 物語の導入部：社内データの活用</h3>
+                    <p class="text-gray-700">社内利用率データと他社の成功事例を提示し、「効率性のギャップ」を可視化します。これにより、参加者の中に「自分ごと」としての切迫感と、達成すべき共通の目標が生まれ、ワークショップを単なる技術デモから全社的なイニシアチブへと昇華させます。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="blueprint" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Part 2: 30分ワークショップの設計図</h2>
+            <p class="text-lg text-gray-600 mb-8">エンゲージメントとインパクトを最大化するためのタイムライン。下のタブをクリックして各パートの詳細を確認してください。</p>
+            
+            <div class="border-b border-gray-200">
+                <nav id="timeline-tabs" class="-mb-px flex space-x-6" aria-label="Tabs">
+                    <button data-target="panel-1" class="timeline-tab tab-active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        導入 (0-3分)
+                    </button>
+                    <button data-target="panel-2" class="timeline-tab tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Gemini実践 (3-15分)
+                    </button>
+                    <button data-target="panel-3" class="timeline-tab tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Notion AI実践 (15-27分)
+                    </button>
+                    <button data-target="panel-4" class="timeline-tab tab-inactive whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        行動喚起 (27-30分)
+                    </button>
+                </nav>
+            </div>
+
+            <div class="mt-8">
+                <div id="panel-1" class="content-panel active">
+                    <div class="section-card p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">導入：「効率性のギャップ」を提示する</h3>
+                        <p class="text-gray-700 mb-6">データに基づく信頼性、参加者との関連性（時間節約）、そして明確で達成可能な目標（2つのコツを学ぶ）を即座に確立し、セッションへの集中力を高めます。</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <h4 class="font-bold text-blue-800">プレゼンタースクリプト概要</h4>
+                            <p class="text-blue-700 mt-2">「皆様、ようこそ。これからの27分間で、皆様の週の業務時間を数時間取り戻すためのきっかけをご提供します。現在、社内データによると、私たちのうちGeminiを積極的に利用しているのはわずか[X]%です。一方で、他社事例では週に3時間以上もの時間を節約しています。本日、私たちはこの『効率性のギャップ』を埋める第一歩を踏み出します。」</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-2" class="content-panel">
+                    <div class="section-card p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Geminiの実践：あなたの新しいコミュニケーションアシスタント</h3>
+                        <p class="text-gray-700 mb-6">多くの従業員が日々直面する「ビジネス文書の作成」という共通の課題解決に焦点を当てます。</p>
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">デモ1: 乱雑なメモから洗練されたメールへ (8分)</h4>
+                                <p class="text-gray-600 mb-4">箇条書きのメモから、構造化されたプロンプトを使って完璧なビジネスメールを生成する過程を見せます。</p>
+                                <div class="prompt-card">
+                                    <button class="copy-btn" onclick="copyToClipboard(this)">コピー</button>
+                                    <pre><code># 役割: あなたはプロのビジネスコミュニケーターです。
+# 目的: 丁寧かつ簡潔なビジネスメールをクライアント向けに作成してください。
+# 文脈: 明日午前10時の会議の日程を確認し、添付した資料を事前にレビューしていただくよう依頼する必要があります。
+# トーン: プロフェッショナルでありながら、親しみやすい雰囲気でお願いします。
+# 出力形式: 件名とメール本文</code></pre>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">デモ2: 長文要約ツールとしての活用 (4分)</h4>
+                                <p class="text-gray-600 mb-4">ニュース記事などのURLを使い、シンプルなプロンプトで要点を瞬時に把握する方法を実演します。</p>
+                                <div class="prompt-card">
+                                    <button class="copy-btn" onclick="copyToClipboard(this)">コピー</button>
+                                    <pre><code>この記事の要点を5つの箇条書きで要約してください: [URLをここに貼り付け]</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-3" class="content-panel">
+                     <div class="section-card p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Notion AIの実践：あなたの創造的・編集パートナー</h3>
+                        <p class="text-gray-700 mb-6">既存のドキュメント内で、いかにNotion AIが共同作業パートナーとなりうるかを実演します。</p>
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">デモ1: 既存ドキュメントの即時改善 (6分)</h4>
+                                <p class="text-gray-600 mb-4">テキストをハイライトし、「AIに依頼」メニューから「トーンを編集」や「翻訳」を選択するだけで、文章が即座に洗練される様子を見せます。プロンプト入力が不要な、最も参入障壁の低い活用法です。</p>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-700 mb-2">デモ2: アイデア創出の起爆剤 (6分)</h4>
+                                <p class="text-gray-600 mb-4">空白のページで`スペース`キーを押し、簡単なプロンプトでブレインストーミングを行う方法を実演。創造的な行き詰まりを打開するパートナーとしてのAIを提示します。</p>
+                                <div class="prompt-card">
+                                    <button class="copy-btn" onclick="copyToClipboard(this)">コピー</button>
+                                    <pre><code>新製品[製品名]のソーシャルメディアキャンペーンに関する創造的なアイデアを5つブレインストーミングしてください。</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-4" class="content-panel">
+                    <div class="section-card p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">行動喚起と今後の展望</h3>
+                        <p class="text-gray-700 mb-6">シンプルで測定可能、かつ低コミットメントな行動喚起を行い、アンケートを通じて次回のワークショップへの参加意欲を高めます。</p>
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg mb-6">
+                            <h4 class="font-bold text-green-800">プレゼンタースクリプト概要</h4>
+                            <p class="text-green-700 mt-2">「皆様へのミッションは、今週、これらの機能を**それぞれ1回だけ**試していただくことです。チャットに2分で完了するアンケートへのリンクを共有します。皆様のフィードバックが、次回のワークショップ内容を決定します。」</p>
+                        </div>
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <h4 class="font-bold text-gray-800">キーポイント</h4>
+                            <ul class="list-disc list-inside mt-2 text-gray-700">
+                                <li>行動喚起はシンプルに「まず1回」。</li>
+                                <li>アンケートを「次回の内容を決めるツール」として位置づけ、参加者の主体性を引き出す。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Part 3: 実践用リソース</h2>
+            <p class="text-lg text-gray-600 mb-8">ワークショップで活用できるプロンプトライブラリとデモ用アセットです。</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <details class="section-card p-6 cursor-pointer">
+                        <summary class="font-bold text-lg text-gray-800">Gemini プロンプトライブラリ（初級編）</summary>
+                        <div class="mt-4 space-y-4">
+                            <p class="text-gray-600"><strong>メール生成:</strong> 会議依頼、フォローアップ、謝罪など、様々なシナリオに応じたメールプロンプト。</p>
+                            <p class="text-gray-600"><strong>要約:</strong> URL、貼り付けたテキスト、会議の文字起こしデータなどを要約するためのプロンプト例。</p>
+                            <p class="text-gray-600"><strong>情報収集:</strong> `[複雑なビジネス用語]を、中学生にも分かるように説明してください` のような、平易な説明を求めるプロンプト例。</p>
+                        </div>
+                    </details>
+                    <details class="section-card p-6 cursor-pointer">
+                        <summary class="font-bold text-lg text-gray-800">Notion AI 「初めての利用」シナリオ</summary>
+                        <div class="mt-4 space-y-4">
+                            <p class="text-gray-600"><strong>「即時改善」デモ用テキスト:</strong> 少し不自然なトーンを持つ「改善前」のテキストサンプル。</p>
+                            <p class="text-gray-600"><strong>ブレインストーミング用プロンプト:</strong> `...に関するマーケティングメールの件名を3つ生成してください` など、様々な部署で使えるプロンプト集。</p>
+                        </div>
+                    </details>
+                </div>
+                <div class="section-card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">✨ 実践プロンプト自動生成</h3>
+                    <p class="text-gray-600 mb-4">デモで使いたいシナリオを入力すると、Geminiが効果的なプロンプトを生成します。</p>
+                    <div class="space-y-4">
+                        <input id="prompt-scenario-input" type="text" placeholder="例：新機能のリリースを社内に告知するメール" class="w-full p-2 border border-gray-300 rounded-md">
+                        <button id="generate-prompt-btn" class="gemini-btn w-full">プロンプトを生成</button>
+                        <div id="prompt-loader" class="hidden loader"></div>
+                        <div id="prompt-output" class="p-4 bg-gray-100 rounded-md hidden whitespace-pre-wrap font-mono text-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="measurement" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Part 4: 成功の測定と継続的な展開</h2>
+            <p class="text-lg text-gray-600 mb-8">事後アンケートは、満足度測定だけでなく、次回のカリキュラムを設計するための戦略的診断ツールです。</p>
+            <div class="grid lg:grid-cols-2 gap-12 items-start">
+                <div class="space-y-8">
+                    <div class="section-card p-8">
+                        <h3 class="text-xl font-bold mb-4 text-gray-800">戦略的アンケート項目案</h3>
+                        <p class="text-gray-600 mb-6">最も重要な質問は、参加者が次に何を学びたいかです。これにより、需要に基づいたカリキュラムを設計し、継続的な参加を促進します。</p>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✓</span><span><strong>全体的な体験:</strong> ワークショップの価値と講師の明瞭度を評価。</span></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✓</span><span><strong>学習と自信:</strong> 利用への意欲の変化と、最も役立った点を測定。</span></li>
+                            <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">✓</span><span><strong>将来のニーズ:</strong> 次に学びたい業務を具体的に選択してもらう（最重要）。</span></li>
+                        </ul>
+                    </div>
+                    <div class="section-card p-8">
+                         <h3 class="text-xl font-bold mb-4 text-gray-800">✨ アンケートフィードバック分析</h3>
+                         <p class="text-gray-600 mb-4">参加者からの自由記述フィードバックを貼り付けると、Geminiが主要なテーマを要約し、次回のトピック案を提案します。</p>
+                         <textarea id="feedback-input" rows="6" class="w-full p-2 border border-gray-300 rounded-md" placeholder="ここに自由記述のフィードバックを貼り付け..."></textarea>
+                         <button id="analyze-feedback-btn" class="gemini-btn w-full mt-2">フィードバックを分析</button>
+                         <div id="feedback-loader" class="hidden loader"></div>
+                         <div id="feedback-output" class="p-4 bg-gray-100 rounded-md mt-4 hidden"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-center text-gray-800">アンケート結果（想定）: 次回ワークショップの希望トピック</h3>
+                    <div class="chart-container">
+                        <canvas id="surveyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-500">
+            <p>&copy; 2025 社内AI活用推進室. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.timeline-tab');
+            const panels = document.querySelectorAll('.content-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.classList.remove('tab-active');
+                        t.classList.add('tab-inactive');
+                    });
+                    tab.classList.add('tab-active');
+                    tab.classList.remove('tab-inactive');
+
+                    const targetId = tab.getAttribute('data-target');
+                    panels.forEach(panel => {
+                        if (panel.id === targetId) {
+                            panel.classList.add('active');
+                        } else {
+                            panel.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            const ctx = document.getElementById('surveyChart').getContext('2d');
+            const surveyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['会議議事録の自動作成・要約', 'プレゼン資料の下書き作成', 'ブレインストーミングと企画書作成', 'スプレッドシートのデータ分析', '長文資料・レポートの要約', 'プロジェクト管理の改善'],
+                    datasets: [{
+                        label: '希望者数',
+                        data: [85, 72, 65, 58, 45, 30],
+                        backgroundColor: [
+                            'rgba(74, 144, 226, 0.7)',
+                            'rgba(80, 227, 194, 0.7)',
+                            'rgba(245, 166, 35, 0.7)',
+                            'rgba(126, 211, 33, 0.7)',
+                            'rgba(189, 16, 224, 0.7)',
+                            'rgba(208, 2, 27, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(74, 144, 226, 1)',
+                            'rgba(80, 227, 194, 1)',
+                            'rgba(245, 166, 35, 1)',
+                            'rgba(126, 211, 33, 1)',
+                            'rgba(189, 16, 224, 1)',
+                            'rgba(208, 2, 27, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#343A40',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw} 名が希望`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '希望者数'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const generatePromptBtn = document.getElementById('generate-prompt-btn');
+            const promptScenarioInput = document.getElementById('prompt-scenario-input');
+            const promptLoader = document.getElementById('prompt-loader');
+            const promptOutput = document.getElementById('prompt-output');
+
+            const analyzeFeedbackBtn = document.getElementById('analyze-feedback-btn');
+            const feedbackInput = document.getElementById('feedback-input');
+            const feedbackLoader = document.getElementById('feedback-loader');
+            const feedbackOutput = document.getElementById('feedback-output');
+
+            generatePromptBtn.addEventListener('click', async () => {
+                const scenario = promptScenarioInput.value;
+                if (!scenario.trim()) {
+                    alert('シナリオを入力してください。');
+                    return;
+                }
+                const userPrompt = `あなたはプロンプトエンジニアリングの専門家です。以下の業務シナリオを達成するための、構造化された高品質なGemini用プロンプトを作成してください。プロンプトには #役割, #目的, #文脈, #トーン, #出力形式 のような明確な指示を含めてください。\n\nシナリオ: ${scenario}`;
+                
+                promptLoader.style.display = 'block';
+                promptOutput.style.display = 'none';
+                generatePromptBtn.disabled = true;
+
+                try {
+                    const resultText = await callGeminiAPI(userPrompt);
+                    promptOutput.textContent = resultText;
+                    promptOutput.style.display = 'block';
+                } catch (error) {
+                    promptOutput.textContent = 'エラーが発生しました。しばらくしてから再度お試しください。';
+                    promptOutput.style.display = 'block';
+                } finally {
+                    promptLoader.style.display = 'none';
+                    generatePromptBtn.disabled = false;
+                }
+            });
+
+            analyzeFeedbackBtn.addEventListener('click', async () => {
+                const feedback = feedbackInput.value;
+                 if (!feedback.trim()) {
+                    alert('フィードバックを入力してください。');
+                    return;
+                }
+                const userPrompt = `あなたはデータアナリストです。以下のAIワークショップに関する自由記述のフィードバックを分析してください。\n\nフィードバック:\n---\n${feedback}\n---\n\n分析タスク:\n1. 主要なポジティブな意見とネガティブな意見をそれぞれ3点ずつ箇条書きで要約してください。\n2. これらのフィードバックに基づき、次回のワークショップで取り上げるべきトピックを3つ提案してください。`;
+
+                feedbackLoader.style.display = 'block';
+                feedbackOutput.style.display = 'none';
+                analyzeFeedbackBtn.disabled = true;
+
+                try {
+                    const resultText = await callGeminiAPI(userPrompt);
+                    feedbackOutput.innerHTML = formatGeminiResponse(resultText);
+                    feedbackOutput.style.display = 'block';
+                } catch (error) {
+                    feedbackOutput.innerHTML = '<p>エラーが発生しました。しばらくしてから再度お試しください。</p>';
+                    feedbackOutput.style.display = 'block';
+                } finally {
+                    feedbackLoader.style.display = 'none';
+                    analyzeFeedbackBtn.disabled = false;
+                }
+            });
+        });
+
+        function copyToClipboard(button) {
+            const pre = button.parentElement;
+            const code = pre.querySelector('code');
+            const textToCopy = code.innerText;
+            
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const originalText = button.innerText;
+            button.innerText = 'コピー完了!';
+            button.style.backgroundColor = '#48BB78';
+            setTimeout(() => {
+                button.innerText = originalText;
+                button.style.backgroundColor = '';
+            }, 2000);
+        }
+
+        async function callGeminiAPI(prompt, retries = 3, delay = 1000) {
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            const payload = { contents: chatHistory };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("予期せぬAPIレスポンス形式です。");
+                    }
+                } catch (error) {
+                    if (i === retries - 1) {
+                        throw error;
+                    }
+                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                }
+            }
+        }
+
+        function formatGeminiResponse(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
+                .replace(/(\n\s*\*)/g, '<ul><li class="ml-4 list-disc">') 
+                .replace(/(\n\n)/g, '</li></ul><br>')
+                .replace(/(\n)/g, '<br>')
+                .replace(/<\/li><\/ul><br><ul><li class/g, '<li class');
+        }
+
+    </script>
+</body>
+</html>
