@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workshop#1🚀プロンプトビルダー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 星空の背景 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: 600;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95em;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            height: 20px;
+            margin: 25px auto;
+            max-width: 500px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4a9eff, #00d4ff);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(74, 158, 255, 0.5);
+        }
+
+        .step-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            animation: slideIn 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .step-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .step-icon {
+            font-size: 1.2em;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #4a9eff;
+            background: linear-gradient(135deg, #f0f8ff, #ffffff);
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(74, 158, 255, 0.3);
+            border-color: transparent;
+        }
+
+        .option-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .option-title {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .option-description {
+            font-size: 0.75em;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4a9eff;
+            border: 2px solid #4a9eff;
+        }
+
+        .btn-secondary:hover {
+            background: #4a9eff;
+            color: white;
+        }
+
+        .result-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            animation: bounceIn 0.8s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .result-prompt-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .result-prompt {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-left: 4px solid #4a9eff;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.8;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #2c3e50;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(74, 158, 255, 0.3);
+        }
+
+        .copy-btn:hover {
+            background: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #4ade80;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            padding: 10px 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .gemini-btn {
+            background: linear-gradient(135deg, #4285f4, #ea4335);
+            color: white;
+        }
+
+        .notion-btn {
+            background: #000;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #topicInput {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            font-size: 0.95em;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #topicInput:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 10px rgba(74, 158, 255, 0.2);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .floating-emoji {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.5em;
+            animation: float 4s ease-in-out infinite;
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(5deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空の背景 -->
+    <div class="stars" id="stars"></div>
+
+    <!-- 浮遊する装飾 -->
+    <div class="floating-emoji" style="top: 10%; left: 5%;">✨</div>
+    <div class="floating-emoji" style="top: 20%; right: 10%; animation-delay: 1s;">🚀</div>
+    <div class="floating-emoji" style="bottom: 20%; left: 8%; animation-delay: 2s;">💫</div>
+    <div class="floating-emoji" style="bottom: 30%; right: 5%; animation-delay: 3s;">⭐</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>AI Workshop#1🚀プロンプトビルダー</h1>
+            <p>カードを選ぶだけで、ご希望のプロンプトが完成します！</p>
+        </div>
+
+        <!-- プログレスバー -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar">
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+
+        <!-- ステップ1: 目的 -->
+        <div class="step-container" id="step1">
+            <h2 class="step-title">
+                <span class="step-icon">🎯</span>
+                <span>Step1：何を効率化したいですか？</span>
+            </h2>
+            <div class="options-grid">
+                <div class="option-card" data-value="文章を作成" data-step="1">
+                    <span class="option-icon">✍️</span>
+                    <div class="option-title">文章作成</div>
+                    <div class="option-description">レポート、メール、記事</div>
+                </div>
+                <div class="option-card" data-value="要約を作成" data-step="1">
+                    <span class="option-icon">📝</span>
+                    <div class="option-title">要約</div>
+                    <div class="option-description">長文を簡潔にまとめる</div>
+                </div>
+                <div class="option-card" data-value="翻訳" data-step="1">
+                    <span class="option-icon">🌐</span>
+                    <div class="option-title">翻訳</div>
+                    <div class="option-description">他言語への変換</div>
+                </div>
+                <div class="option-card" data-value="アイデアを生成" data-step="1">
+                    <span class="option-icon">💡</span>
+                    <div class="option-title">アイデア出し</div>
+                    <div class="option-description">ブレインストーミング</div>
+                </div>
+                <div class="option-card" data-value="分析を実施" data-step="1">
+                    <span class="option-icon">📊</span>
+                    <div class="option-title">分析</div>
+                    <div class="option-description">データや情報の分析</div>
+                </div>
+                <div class="option-card" data-value="説明を提供" data-step="1">
+                    <span class="option-icon">🎓</span>
+                    <div class="option-title">学習・説明</div>
+                    <div class="option-description">知識や情報の提供</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ステップ2: スタイル -->
+        <div class="step-container hidden" id="step2">
+            <h2 class="step-title">
+                <span class="step-icon">🎨</span>
+                <span>Step2：どのようなトーンにしますか？</span>
+            </h2>
+            <div class="options-grid">
+                <div class="option-card" data-value="プロフェッショナル" data-step="2">
+                    <span class="option-icon">👔</span>
+                    <div class="option-title">プロフェッショナル</div>
+                    <div class="option-description">ビジネス・フォーマル</div>
+                </div>
+                <div class="option-card" data-value="カジュアル" data-step="2">
+                    <span class="option-icon">😊</span>
+                    <div class="option-title">カジュアル</div>
+                    <div class="option-description">親しみやすい</div>
+                </div>
+                <div class="option-card" data-value="簡潔" data-step="2">
+                    <span class="option-icon">⚡</span>
+                    <div class="option-title">簡潔</div>
+                    <div class="option-description">要点のみ</div>
+                </div>
+                <div class="option-card" data-value="詳細" data-step="2">
+                    <span class="option-icon">🔍</span>
+                    <div class="option-title">詳細</div>
+                    <div class="option-description">丁寧で詳しい</div>
+                </div>
+                <div class="option-card" data-value="創造的" data-step="2">
+                    <span class="option-icon">🎭</span>
+                    <div class="option-title">創造的</div>
+                    <div class="option-description">ユニークな表現</div>
+                </div>
+                <div class="option-card" data-value="初心者向け" data-step="2">
+                    <span class="option-icon">👶</span>
+                    <div class="option-title">初心者向け</div>
+                    <div class="option-description">わかりやすく</div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousStep()">← 戻る</button>
+            </div>
+        </div>
+
+        <!-- ステップ3: 詳細 -->
+        <div class="step-container hidden" id="step3">
+            <h2 class="step-title">
+                <span class="step-icon">📋</span>
+                <span>Step3：その他、出力イメージのご希望を教えて下さい。</span>
+            </h2>
+            <div class="options-grid">
+                <div class="option-card" data-value="箇条書き形式" data-step="3">
+                    <span class="option-icon">📌</span>
+                    <div class="option-title">箇条書き</div>
+                    <div class="option-description">リスト形式</div>
+                </div>
+                <div class="option-card" data-value="具体例を含む" data-step="3">
+                    <span class="option-icon">💭</span>
+                    <div class="option-title">例示あり</div>
+                    <div class="option-description">具体例付き</div>
+                </div>
+                <div class="option-card" data-value="ステップバイステップ" data-step="3">
+                    <span class="option-icon">🪜</span>
+                    <div class="option-title">段階的</div>
+                    <div class="option-description">順を追って</div>
+                </div>
+                <div class="option-card" data-value="比較形式" data-step="3">
+                    <span class="option-icon">⚖️</span>
+                    <div class="option-title">比較</div>
+                    <div class="option-description">違いを明確に</div>
+                </div>
+                <div class="option-card" data-value="結論ファースト" data-step="3">
+                    <span class="option-icon">🎯</span>
+                    <div class="option-title">結論優先</div>
+                    <div class="option-description">答えから始める</div>
+                </div>
+                <div class="option-card" data-value="Q&A形式" data-step="3">
+                    <span class="option-icon">❓</span>
+                    <div class="option-title">Q&A</div>
+                    <div class="option-description">質問と回答</div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousStep()">← 戻る</button>
+            </div>
+        </div>
+
+        <!-- ステップ4: テーマ入力 -->
+        <div class="step-container hidden" id="step4">
+            <h2 class="step-title">
+                <span class="step-icon">✏️</span>
+                <span>Step4：何について記載しますか？</span>
+            </h2>
+            <p class="step-subtitle">以下のトピックから選ぶ・ご自身で自由入力も可能です。</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <div class="options-grid" style="max-width: 700px; margin: 0 auto;">
+                    <div class="option-card topic-suggestion" data-topic="AIの活用方法">
+                        <span class="option-icon">🤖</span>
+                        <div class="option-title">AIの活用方法</div>
+                    </div>
+                    <div class="option-card topic-suggestion" data-topic="プロジェクト管理">
+                        <span class="option-icon">📊</span>
+                        <div class="option-title">プロジェクト管理</div>
+                    </div>
+                    <div class="option-card topic-suggestion" data-topic="新商品の企画">
+                        <span class="option-icon">💡</span>
+                        <div class="option-title">新商品の企画</div>
+                    </div>
+                    <div class="option-card topic-suggestion" data-topic="会議の議事録">
+                        <span class="option-icon">📝</span>
+                        <div class="option-title">会議の議事録</div>
+                    </div>
+                </div>
+                <div style="margin-top: 25px;">
+                    <input type="text" id="topicInput" placeholder="または、ここに自由に入力...">
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousStep()">← 戻る</button>
+                <button class="btn btn-primary" onclick="generatePrompt()">✨ プロンプト生成！</button>
+            </div>
+        </div>
+
+        <!-- 結果表示 -->
+        <div class="result-container" id="resultContainer">
+            <h2 class="step-title">
+                <span class="step-icon">🎉</span>
+                <span>完成したあなたのプロンプトはこちらです！</span>
+            </h2>
+            <div class="result-prompt-wrapper">
+                <button class="copy-btn" onclick="copyPrompt()">📋 コピー</button>
+                <div class="result-prompt" id="resultPrompt">
+                    <div id="promptText"></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a href="https://gemini.google.com/app" target="_blank" class="action-btn gemini-btn">
+                    <span>✨</span>
+                    <span>Geminiで使ってみる</span>
+                </a>
+                <a href="https://www.notion.so/power-x/fd987a6f3cc740c080ea6dd3543b09ba" target="_blank" class="action-btn notion-btn">
+                    <span>📝</span>
+                    <span>Notionで使ってみる</span>
+                </a>
+                <button class="btn btn-primary" onclick="startOver()">🔄 もう一度作る</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 星空を生成
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                
+                // ランダムにサイズを変える
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // ページ読み込み時に星を生成
+        window.addEventListener('load', createStars);
+
+        let currentStep = 1;
+        let selections = {
+            purpose: '',
+            style: '',
+            format: '',
+            topic: ''
+        };
+
+        // オプションカードのクリックイベント
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('topic-suggestion')) {
+                    // トピック提案カード
+                    document.getElementById('topicInput').value = this.dataset.topic;
+                    document.querySelectorAll('.topic-suggestion').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                } else {
+                    // 通常のステップカード
+                    const step = this.dataset.step;
+                    const value = this.dataset.value;
+                    
+                    // 同じステップの他のカードの選択を解除
+                    document.querySelectorAll(`[data-step="${step}"]`).forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // このカードを選択
+                    this.classList.add('selected');
+                    
+                    // 選択を保存
+                    if (step === '1') selections.purpose = value;
+                    if (step === '2') selections.style = value;
+                    if (step === '3') selections.format = value;
+                    
+                    // 自動的に次のステップへ
+                    setTimeout(() => {
+                        if (currentStep < 4) {
+                            nextStep();
+                        }
+                    }, 300);
+                }
+            });
+        });
+
+        function updateProgress() {
+            const progress = (currentStep / 4) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        }
+
+        function nextStep() {
+            if (currentStep < 4) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep++;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateProgress();
+                
+                // ページ上部にスクロール
+                window.scrollTo({ 
+                    top: 0, 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateProgress();
+                
+                // スクロール
+                document.getElementById(`step${currentStep}`).scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }
+        }
+
+        function generatePrompt() {
+            const topic = document.getElementById('topicInput').value;
+            
+            if (!topic) {
+                alert('トピックを入力してください！');
+                return;
+            }
+            
+            selections.topic = topic;
+            
+            // より構造化されたプロンプトを生成
+            let prompt = `# タスク\n`;
+            prompt += `${selections.topic}について、${selections.purpose}してください。\n\n`;
+            
+            prompt += `## 要件\n`;
+            prompt += `- **トーン**: ${selections.style}な文体で書くこと\n`;
+            prompt += `- **形式**: ${selections.format}で構成すること\n`;
+            prompt += `- **対象読者**: 専門知識がない人でも理解できるように配慮すること\n\n`;
+            
+            prompt += `## 期待する出力\n`;
+            prompt += `1. 明確で読みやすい構成\n`;
+            prompt += `2. 重要なポイントは**太字**で強調\n`;
+            prompt += `3. 必要に応じて見出しを使用して整理\n`;
+            prompt += `4. 実践的で活用しやすい内容\n\n`;
+            
+            prompt += `## 追加の指示\n`;
+            prompt += `- 専門用語を使う場合は、簡単な説明を付けること\n`;
+            prompt += `- 読者が次のアクションを取りやすいような結論にすること`;
+            
+            // 結果を表示
+            document.getElementById('promptText').textContent = prompt;
+            document.getElementById('step4').classList.add('hidden');
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            // プログレスバーを100%に
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressText').textContent = '100%';
+            
+            // 結果にスクロール
+            document.getElementById('resultContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // 祝福エフェクト
+            celebrateCompletion();
+        }
+
+        function copyPrompt() {
+            const promptText = document.getElementById('promptText').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = '✅ コピー完了！';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 コピー';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function startOver() {
+            // リセット
+            currentStep = 1;
+            selections = {
+                purpose: '',
+                style: '',
+                format: '',
+                topic: ''
+            };
+            
+            // UIをリセット
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('topicInput').value = '';
+            
+            // ステップを表示
+            document.getElementById('resultContainer').style.display = 'none';
+            document.querySelectorAll('.step-container').forEach(step => {
+                step.classList.add('hidden');
+            });
+            document.getElementById('step1').classList.remove('hidden');
+            
+            // プログレスバーをリセット
+            updateProgress();
+            
+            // トップにスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function celebrateCompletion() {
+            // 宇宙テーマの祝福アニメーション
+            const emojis = ['⭐', '✨', '💫', '🌟', '🚀', '🌙'];
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.position = 'fixed';
+                    emoji.style.left = Math.random() * window.innerWidth + 'px';
+                    emoji.style.top = '-50px';
+                    emoji.style.fontSize = '1.8em';
+                    emoji.style.zIndex = '9999';
+                    emoji.style.transition = 'all 2s ease-out';
+                    emoji.style.pointerEvents = 'none';
+                    document.body.appendChild(emoji);
+                    
+                    setTimeout(() => {
+                        emoji.style.top = window.innerHeight + 'px';
+                        emoji.style.opacity = '0';
+                        emoji.style.transform = 'rotate(360deg)';
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 2100);
+                }, i * 200);
+            }
+        }
+
+        // 初期プログレス設定
+        updateProgress();
+    </script>
+</body>
+</html>
