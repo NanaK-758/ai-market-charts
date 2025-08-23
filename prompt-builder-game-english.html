@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workshop#1🚀Prompt Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Star background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: 600;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95em;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            height: 20px;
+            margin: 25px auto;
+            max-width: 500px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4a9eff, #00d4ff);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(74, 158, 255, 0.5);
+        }
+
+        .step-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            animation: slideIn 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .step-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .step-icon {
+            font-size: 1.2em;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #4a9eff;
+            background: linear-gradient(135deg, #f0f8ff, #ffffff);
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(74, 158, 255, 0.3);
+            border-color: transparent;
+        }
+
+        .option-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .option-title {
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .option-description {
+            font-size: 0.75em;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a9eff, #00d4ff);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4a9eff;
+            border: 2px solid #4a9eff;
+        }
+
+        .btn-secondary:hover {
+            background: #4a9eff;
+            color: white;
+        }
+
+        .result-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            animation: bounceIn 0.8s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .result-prompt-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .result-prompt {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-left: 4px solid #4a9eff;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.8;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #2c3e50;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(74, 158, 255, 0.3);
+        }
+
+        .copy-btn:hover {
+            background: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #4ade80;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            padding: 10px 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .gemini-btn {
+            background: linear-gradient(135deg, #4285f4, #ea4335);
+            color: white;
+        }
+
+        .notion-btn {
+            background: #000;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #topicInput {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            font-size: 0.95em;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        #topicInput:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 10px rgba(74, 158, 255, 0.2);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .floating-emoji {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1.5em;
+            animation: float 4s ease-in-out infinite;
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(5deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Star background -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Floating decorations -->
+    <div class="floating-emoji" style="top: 10%; left: 5%;">✨</div>
+    <div class="floating-emoji" style="top: 20%; right: 10%; animation-delay: 1s;">🚀</div>
+    <div class="floating-emoji" style="bottom: 20%; left: 8%; animation-delay: 2s;">💫</div>
+    <div class="floating-emoji" style="bottom: 30%; right: 5%; animation-delay: 3s;">⭐</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>AI Workshop#1🚀Prompt Builder</h1>
+            <p>Just select cards to create your perfect prompt!</p>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar">
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Purpose -->
+        <div class="step-container" id="step1">
+            <h2 class="step-title">
+                <span class="step-icon">🎯</span>
+                <span>Step 1: What would you like to optimize?</span>
+            </h2>
+            <div class="options-grid">
+                <div class="option-card" data-value="Create content" data-step="1">
+                    <span class="option-icon">✍️</span>
+                    <div class="option-title">Writing</div>
+                    <div class="option-description">Reports, emails, articles</div>
+                </div>
+                <div class="option-card" data-value="Summarize" data-step="1">
+                    <span class="option-icon">📝</span>
+                    <div class="option-title">Summary</div>
+                    <div class="option-description">Condense long texts</div>
+                </div>
+                <div class="option-card" data-value="Translate" data-step="1">
+                    <span class="option-icon">🌐</span>
+                    <div class="option-title">Translation</div>
+                    <div class="option-description">Convert to other languages</div>
+                </div>
+                <div class="option-card" data-value="Generate ideas" data-step="1">
+                    <span class="option-icon">💡</span>
+                    <div class="option-title">Ideation</div>
+                    <div class="option-description">Brainstorming</div>
+                </div>
+                <div class="option-card" data-value="Analyze" data-step="1">
+                    <span class="option-icon">📊</span>
+                    <div class="option-title">Analysis</div>
+                    <div class="option-description">Data and information</div>
+                </div>
+                <div class="option-card" data-value="Explain" data-step="1">
+                    <span class="option-icon">🎓</span>
+                    <div class="option-title">Learning</div>
+                    <div class="option-description">Knowledge and information</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Style -->
+        <div class="step-container hidden" id="step2">
+            <h2 class="step-title">
+                <span class="step-icon">🎨</span>
+                <span>Step 2: What tone would you like?</span>
+            </h2>
+            <div class="options-grid">
+                <div class="option-card" data-value="Professional" data-step="2">
+                    <span class="option-icon">👔</span>
+                    <div class="option-title">Professional</div>
+                    <div class="option-description">Business & formal</div>
+                </div>
+                <div class="option-card" data-value="Casual" data-step="2">
+                    <span class="option-icon">😊</span>
+                    <div class="option-title">Casual</div>
+                    <div class="option-description">Friendly approach</div>
+                </div>
+                <div class="option-card" data-value="Concise" data-step="2">
+                    <span class="option-icon">⚡</span>
+                    <div class="option-title">Concise</div>
+                    <div class="option-description">Key points only</div>
+                </div>
+                <div class="option-card" data-value="Detailed" data-step="2">
+                    <span class="option-icon">🔍</span>
+                    <div class="option-title">Detailed</div>
+                    <div class="option-description">Thorough explanation</div>
+                </div>
+                <div class="option-card" data-value="Creative" data-step="2">
+                    <span class="option-icon">🎭</span>
+                    <div class="option-title">Creative</div>
+                    <div class="option-description">Unique expression</div>
+                </div>
+                <div class="option-card" data-value="Beginner-friendly" data-step="2">
+                    <span class="option-icon">👶</span>
+                    <div class="option-title">Beginner-friendly</div>
+                    <div class="option-description">Easy to understand</div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousStep()">← Back</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Format -->
+        <div class="step-container hidden" id="step3">
+            <h2 class="step-title">
+                <span class="step-icon">📋</span>
+                <span>Step 3: Any other preferences for the output?</span>
+            </h2>
+            <div class="options-grid">
+                <div class="option-card" data-value="Bullet points" data-step="3">
+                    <span class="option-icon">📌</span>
+                    <div class="option-title">Bullet Points</div>
+                    <div class="option-description">List format</div>
+                </div>
+                <div class="option-card" data-value="With examples" data-step="3">
+                    <span class="option-icon">💭</span>
+                    <div class="option-title">With Examples</div>
+                    <div class="option-description">Include concrete cases</div>
+                </div>
+                <div class="option-card" data-value="Step-by-step" data-step="3">
+                    <span class="option-icon">🪜</span>
+                    <div class="option-title">Step-by-Step</div>
+                    <div class="option-description">Sequential guide</div>
+                </div>
+                <div class="option-card" data-value="Comparison format" data-step="3">
+                    <span class="option-icon">⚖️</span>
+                    <div class="option-title">Comparison</div>
+                    <div class="option-description">Clear differences</div>
+                </div>
+                <div class="option-card" data-value="Conclusion first" data-step="3">
+                    <span class="option-icon">🎯</span>
+                    <div class="option-title">Conclusion First</div>
+                    <div class="option-description">Start with answer</div>
+                </div>
+                <div class="option-card" data-value="Q&A format" data-step="3">
+                    <span class="option-icon">❓</span>
+                    <div class="option-title">Q&A</div>
+                    <div class="option-description">Questions and answers</div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousStep()">← Back</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Topic input -->
+        <div class="step-container hidden" id="step4">
+            <h2 class="step-title">
+                <span class="step-icon">✏️</span>
+                <span>Step 4: What topic would you like to cover?</span>
+            </h2>
+            <p class="step-subtitle">Choose from topics below or enter your own</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <div class="options-grid" style="max-width: 700px; margin: 0 auto;">
+                    <div class="option-card topic-suggestion" data-topic="AI implementation strategies">
+                        <span class="option-icon">🤖</span>
+                        <div class="option-title">AI Strategies</div>
+                    </div>
+                    <div class="option-card topic-suggestion" data-topic="Project management">
+                        <span class="option-icon">📊</span>
+                        <div class="option-title">Project Management</div>
+                    </div>
+                    <div class="option-card topic-suggestion" data-topic="New product planning">
+                        <span class="option-icon">💡</span>
+                        <div class="option-title">Product Planning</div>
+                    </div>
+                    <div class="option-card topic-suggestion" data-topic="Meeting minutes">
+                        <span class="option-icon">📝</span>
+                        <div class="option-title">Meeting Minutes</div>
+                    </div>
+                </div>
+                <div style="margin-top: 25px;">
+                    <input type="text" id="topicInput" placeholder="Or enter your topic here...">
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn btn-secondary" onclick="previousStep()">← Back</button>
+                <button class="btn btn-primary" onclick="generatePrompt()">✨ Generate Prompt!</button>
+            </div>
+        </div>
+
+        <!-- Result display -->
+        <div class="result-container" id="resultContainer">
+            <h2 class="step-title">
+                <span class="step-icon">🎉</span>
+                <span>Here's your completed prompt!</span>
+            </h2>
+            <div class="result-prompt-wrapper">
+                <button class="copy-btn" onclick="copyPrompt()">📋 Copy</button>
+                <div class="result-prompt" id="resultPrompt">
+                    <div id="promptText"></div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <a href="https://gemini.google.com/app" target="_blank" class="action-btn gemini-btn">
+                    <span>✨</span>
+                    <span>Try with Gemini</span>
+                </a>
+                <a href="https://www.notion.so/power-x/fd987a6f3cc740c080ea6dd3543b09ba" target="_blank" class="action-btn notion-btn">
+                    <span>📝</span>
+                    <span>Try with Notion</span>
+                </a>
+                <button class="btn btn-primary" onclick="startOver()">🔄 Create Another</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate starry sky
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                
+                // Random sizes
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Generate stars on page load
+        window.addEventListener('load', createStars);
+
+        let currentStep = 1;
+        let selections = {
+            purpose: '',
+            style: '',
+            format: '',
+            topic: ''
+        };
+
+        // Option card click events
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('topic-suggestion')) {
+                    // Topic suggestion cards
+                    document.getElementById('topicInput').value = this.dataset.topic;
+                    document.querySelectorAll('.topic-suggestion').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                } else {
+                    // Regular step cards
+                    const step = this.dataset.step;
+                    const value = this.dataset.value;
+                    
+                    // Deselect other cards in same step
+                    document.querySelectorAll(`[data-step="${step}"]`).forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // Select this card
+                    this.classList.add('selected');
+                    
+                    // Save selection
+                    if (step === '1') selections.purpose = value;
+                    if (step === '2') selections.style = value;
+                    if (step === '3') selections.format = value;
+                    
+                    // Auto advance to next step
+                    setTimeout(() => {
+                        if (currentStep < 4) {
+                            nextStep();
+                        }
+                    }, 300);
+                }
+            });
+        });
+
+        function updateProgress() {
+            const progress = (currentStep / 4) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        }
+
+        function nextStep() {
+            if (currentStep < 4) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep++;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ 
+                    top: 0, 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ 
+                    top: 0, 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+
+        function generatePrompt() {
+            const topic = document.getElementById('topicInput').value;
+            
+            if (!topic) {
+                alert('Please enter a topic!');
+                return;
+            }
+            
+            selections.topic = topic;
+            
+            // Generate structured prompt
+            let prompt = `# Task\n`;
+            prompt += `${selections.purpose} about ${selections.topic}.\n\n`;
+            
+            prompt += `## Requirements\n`;
+            prompt += `- **Tone**: Use a ${selections.style.toLowerCase()} writing style\n`;
+            prompt += `- **Format**: Structure the content as ${selections.format.toLowerCase()}\n`;
+            prompt += `- **Audience**: Ensure accessibility for readers without specialized knowledge\n\n`;
+            
+            prompt += `## Expected Output\n`;
+            prompt += `1. Clear and readable structure\n`;
+            prompt += `2. Important points emphasized in **bold**\n`;
+            prompt += `3. Use headings to organize content when necessary\n`;
+            prompt += `4. Practical and actionable content\n\n`;
+            
+            prompt += `## Additional Instructions\n`;
+            prompt += `- Include brief explanations for any technical terms\n`;
+            prompt += `- End with a conclusion that facilitates next actions for the reader`;
+            
+            // Display result
+            document.getElementById('promptText').textContent = prompt;
+            document.getElementById('step4').classList.add('hidden');
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            // Progress to 100%
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressText').textContent = '100%';
+            
+            // Scroll to result
+            document.getElementById('resultContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // Celebration effect
+            celebrateCompletion();
+        }
+
+        function copyPrompt() {
+            const promptText = document.getElementById('promptText').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = '✅ Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = '📋 Copy';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function startOver() {
+            // Reset
+            currentStep = 1;
+            selections = {
+                purpose: '',
+                style: '',
+                format: '',
+                topic: ''
+            };
+            
+            // Reset UI
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('topicInput').value = '';
+            
+            // Show steps
+            document.getElementById('resultContainer').style.display = 'none';
+            document.querySelectorAll('.step-container').forEach(step => {
+                step.classList.add('hidden');
+            });
+            document.getElementById('step1').classList.remove('hidden');
+            
+            // Reset progress bar
+            updateProgress();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function celebrateCompletion() {
+            // Space-themed celebration animation
+            const emojis = ['⭐', '✨', '💫', '🌟', '🚀', '🌙'];
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.position = 'fixed';
+                    emoji.style.left = Math.random() * window.innerWidth + 'px';
+                    emoji.style.top = '-50px';
+                    emoji.style.fontSize = '1.8em';
+                    emoji.style.zIndex = '9999';
+                    emoji.style.transition = 'all 2s ease-out';
+                    emoji.style.pointerEvents = 'none';
+                    document.body.appendChild(emoji);
+                    
+                    setTimeout(() => {
+                        emoji.style.top = window.innerHeight + 'px';
+                        emoji.style.opacity = '0';
+                        emoji.style.transform = 'rotate(360deg)';
+                    }, 100);
+                    
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 2100);
+                }, i * 200);
+            }
+        }
+
+        // Set initial progress
+        updateProgress();
+    </script>
+</body>
+</html>
+                    
