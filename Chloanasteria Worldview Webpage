@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chloanasteria🌏Playlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+        
+        :root {
+            --bg-color: #0d0c1d;
+            --card-bg-color: #1a1932;
+            --accent-pink: #ff007f;
+            --accent-cyan: #00ffff;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg-color);
+            border: 2px solid transparent;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-pink);
+        }
+
+        .music-title {
+            color: var(--accent-cyan);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .city-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .emoji {
+            font-size: 3rem;
+        }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="container text-center">
+        <h1 class="text-4xl sm:text-5xl font-bold mt-4 mb-2 md:mt-8 md:mb-4 tracking-wide">
+            Chloanasteria🌏Playlist
+        </h1>
+        <p class="text-lg sm:text-xl font-medium text-gray-400 mb-8 md:mb-12">
+            7つの都市とBGMのプレイリスト
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+            <!-- Lumina Grove Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">☀️🌳</span>
+                <p class="city-name mt-2">Lumina Grove</p>
+                <h3 class="music-title mt-4">Morning in the Sky Garden</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    日中の光と自然が調和する都市。水の天井から光が降り注ぐ様子を表現した、明るく爽やかなBGM。
+                </p>
+            </div>
+
+            <!-- Neon Vale Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">🏙️🏮</span>
+                <p class="city-name mt-2">Neon Vale</p>
+                <h3 class="music-title mt-4">Neon Night Market Groove</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    アジア風のネオンが輝く夜の街。楽しくリズミカルな雰囲気が、夜市を散策する気分にさせる。
+                </p>
+            </div>
+
+            <!-- Petal Horizon Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">🌸🌌</span>
+                <p class="city-name mt-2">Petal Horizon</p>
+                <h3 class="music-title mt-4">Synth Bloom in the Night</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    地平線に広がる花々のような開放感のある都市。夜空に咲く花のように、明るいシンセが都会的な雰囲気を演出。
+                </p>
+            </div>
+
+            <!-- Cloudroot Plaza Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">☁️🌳</span>
+                <p class="city-name mt-2">Cloudroot Plaza</p>
+                <h3 class="music-title mt-4">Baobab Sky Stage Celebration</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    空中に浮かぶ、雲と根が共存するステージ都市。巨大なバオバブの木の下で人々が集う、お祝いムードの楽曲。
+                </p>
+            </div>
+
+            <!-- Aurora Harbor Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">🌈⚓</span>
+                <p class="city-name mt-2">Aurora Harbor</p>
+                <h3 class="music-title mt-4">Sky Water Breeze</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    オーロラのような光彩を放つ幻想的な港町。水のような音色と流れるようなメロディが、静かで希望に満ちた雰囲気を伝える。
+                </p>
+            </div>
+
+            <!-- Echo Meadow Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">🤖🤝</span>
+                <p class="city-name mt-2">Echo Meadow</p>
+                <h3 class="music-title mt-4">Robot Pet’s Melody</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    ロボットと人間の共感を象徴する草原。ロボットペットとの愛おしい瞬間を表現した、優しく繊細な音色。
+                </p>
+            </div>
+            
+            <!-- Seven Song District Card -->
+            <div class="card p-6 flex flex-col items-center">
+                <span class="emoji">🎶✨</span>
+                <p class="city-name mt-2">Seven Song District</p>
+                <h3 class="music-title mt-4">Cybercourt Anthem</h3>
+                <p class="text-sm text-center text-gray-400 mt-2 leading-relaxed">
+                    音楽と祭りの中心地。テクノロジーと文化の融合を祝う、躍動感あふれるヒップホップ。
+                </p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
