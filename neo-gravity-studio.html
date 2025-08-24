@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEO GRAVITY STUDIO - 7 Cities & Soundscapes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            min-height: 100vh;
+            color: #e0e0ff;
+            overflow-x: hidden;
+        }
+
+        /* Starfield animation */
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent);
+            background-size: 200px 200px;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            margin-bottom: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.3rem;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            color: #a0a0ff;
+            font-size: 1.2rem;
+            letter-spacing: 0.2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .city-card {
+            background: rgba(20, 25, 50, 0.8);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .city-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(100, 150, 255, 0.5), transparent);
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .city-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(100, 150, 255, 0.3);
+        }
+
+        .city-card:hover::before {
+            opacity: 1;
+        }
+
+        .city-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .city-icon {
+            font-size: 3rem;
+            margin-right: 1rem;
+        }
+
+        .city-name {
+            font-size: 1.5rem;
+            color: #00ffff;
+            font-weight: 300;
+            letter-spacing: 0.1rem;
+        }
+
+        .bgm-title {
+            color: #ff00ff;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        .match-reason {
+            color: #e0e0ff;
+            line-height: 1.6;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid;
+        }
+
+        .city-description {
+            color: #a0a0ff;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Color themes for each city */
+        .lumina { border-left-color: #ffeb3b !important; }
+        .neon { border-left-color: #ff00ff !important; }
+        .petal { border-left-color: #ff69b4 !important; }
+        .cloudroot { border-left-color: #87ceeb !important; }
+        .aurora { border-left-color: #00ff7f !important; }
+        .echo { border-left-color: #dda0dd !important; }
+        .seven { border-left-color: #ffd700 !important; }
+
+        .bgm-tag {
+            display: inline-block;
+            background: rgba(100, 150, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            color: #00ffff;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .cities-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    
+    <header>
+        <h1>NEO GRAVITY STUDIO</h1>
+        <p class="subtitle">7 Cities × 7 Soundscapes</p>
+    </header>
+
+    <div class="container">
+        <div class="cities-grid">
+            <!-- Lumina Grove × Morning in the Sky Garden -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">🌟🌳</span>
+                        <h2 class="city-name">Lumina Grove</h2>
+                    </div>
+                </div>
+                <p class="city-description">光と木立の融合・昼の豊かな自然と都市調和</p>
+                <p class="bgm-title">♪ Morning in the Sky Garden</p>
+                <div class="match-reason lumina">
+                    明るいシンセポップの響きが、光に満ちた木立を完璧に表現。空中庭園の朝という設定が、Lumina Groveの昼の自然都市と見事に調和。太陽光が緑の摩天楼を通り抜ける情景を音で描写。
+                </div>
+                <span class="bgm-tag">Bright Synth-Pop</span>
+            </div>
+
+            <!-- Neon Vale × Neon Night Market Groove -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">🌃🎭</span>
+                        <h2 class="city-name">Neon Vale</h2>
+                    </div>
+                </div>
+                <p class="city-description">夜のアジアンなネオン街・楽しくリズミカル</p>
+                <p class="bgm-title">♪ Neon Night Market Groove</p>
+                <div class="match-reason neon">
+                    アジアンテイストのネオンポップが、まさにNeon Valeの世界観そのもの。きらめく鈴の音と軽やかなグルーヴが、ネオン街の賑わいと完全にシンクロ。夜市の活気を音楽で体現。
+                </div>
+                <span class="bgm-tag">Asian Neon Pop</span>
+            </div>
+
+            <!-- Petal Horizon × Synth Bloom in the Night -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">🌸🌅</span>
+                        <h2 class="city-name">Petal Horizon</h2>
+                    </div>
+                </div>
+                <p class="city-description">花びらが地平線に広がる開放感と調和</p>
+                <p class="bgm-title">♪ Synth Bloom in the Night</p>
+                <div class="match-reason petal">
+                    「Bloom（開花）」というキーワードが両者を結ぶ。電子音の花が夜に咲き誇る様子は、Petal Horizonの幻想的な花びらの地平線と美しく重なる。都市的な雰囲気も調和の概念にマッチ。
+                </div>
+                <span class="bgm-tag">Dubstep Vocal Synth</span>
+            </div>
+
+            <!-- Cloudroot Plaza × Baobab Sky Stage Celebration -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">☁️🌲</span>
+                        <h2 class="city-name">Cloudroot Plaza</h2>
+                    </div>
+                </div>
+                <p class="city-description">雲と根・空中ステージと自然共存の浮遊都市</p>
+                <p class="bgm-title">♪ Baobab Sky Stage Celebration</p>
+                <div class="match-reason cloudroot">
+                    巨大なバオバブの空中ステージという設定が、Cloudroot Plazaの浮遊する広場と完璧に一致。祝祭的な電子音が、空と大地を繋ぐ根の概念を音楽的に表現。
+                </div>
+                <span class="bgm-tag">Upbeat Electropop</span>
+            </div>
+
+            <!-- Aurora Harbor × Sky Water Breeze -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">🌌⚓</span>
+                        <h2 class="city-name">Aurora Harbor</h2>
+                    </div>
+                </div>
+                <p class="city-description">オーロラの光彩を持つ港町・幻想的で希望に満ちた</p>
+                <p class="bgm-title">♪ Sky Water Breeze</p>
+                <div class="match-reason aurora">
+                    流れるようなアルペジエーターと水のようなテクスチャーが、オーロラ港の幻想的な光と水の調和を表現。天空の水が光を拡散する様子は、まさにオーロラの輝きそのもの。
+                </div>
+                <span class="bgm-tag">Luminescent Ambient</span>
+            </div>
+
+            <!-- Echo Meadow × Robot Pet's Melody -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">🤖🌾</span>
+                        <h2 class="city-name">Echo Meadow</h2>
+                    </div>
+                </div>
+                <p class="city-description">共鳴する草原・ロボットと自然、人間への共感</p>
+                <p class="bgm-title">♪ Robot Pet's Melody</p>
+                <div class="match-reason echo">
+                    ロボットペットの優しいメロディーが、Echo Meadowのテーマ「共感」を音楽で表現。オルゴールのような繊細な音が、草原に響き渡るエコーと、機械と自然の調和を象徴。
+                </div>
+                <span class="bgm-tag">Music Box Electronic</span>
+            </div>
+
+            <!-- Seven Song District × Cybercourt Anthem -->
+            <div class="city-card">
+                <div class="city-header">
+                    <div>
+                        <span class="city-icon">🎵🏙️</span>
+                        <h2 class="city-name">Seven Song District</h2>
+                    </div>
+                </div>
+                <p class="city-description">音楽と「7」を強調・旅のクライマックス祝祭都市</p>
+                <p class="bgm-title">♪ Cybercourt Anthem</p>
+                <div class="match-reason seven">
+                    希望に満ちたサイバーパンクのアンセムが、旅のクライマックスにふさわしい。95BPMのヒップホップビートが祝祭都市の活気を表現。7つの旅の集大成として、最も力強い音楽を配置。
+                </div>
+                <span class="bgm-tag">Hopeful Cyberpunk Hip-Hop</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
