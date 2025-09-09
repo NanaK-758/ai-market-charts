@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIの超概要 - 歴史から生成AIまで | AI Workshop #1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Yu Gothic UI', 'Hiragino Kaku Gothic ProN', sans-serif;
+            background: #0a0e27;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 宇宙背景アニメーション */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        }
+
+        .space-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, #eee, transparent),
+                radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.6), transparent);
+            background-repeat: repeat;
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            animation: sparkle 20s linear infinite;
+        }
+
+        .floating-emoji {
+            position: fixed;
+            z-index: -1;
+            font-size: 2rem;
+            opacity: 0.7;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .emoji-1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .emoji-2 { top: 20%; right: 15%; animation-delay: 3s; }
+        .emoji-3 { top: 60%; left: 20%; animation-delay: 6s; }
+        .emoji-4 { bottom: 20%; right: 20%; animation-delay: 9s; }
+        .emoji-5 { top: 40%; left: 80%; animation-delay: 12s; }
+
+        @keyframes sparkle {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-100px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(5deg); }
+            66% { transform: translateY(-10px) rotate(-5deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #4facfe;
+            border-radius: 25px;
+            padding: 5px;
+            box-shadow: 0 4px 20px rgba(79, 172, 254, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .language-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #2c3e50;
+        }
+
+        .language-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(79, 172, 254, 0.3);
+        }
+
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            transition: width 0.5s ease;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+
+        .progress-text {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .step {
+            min-height: 100vh;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            padding: 120px 0 100px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .step.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .learning-status {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #4facfe;
+            backdrop-filter: blur(10px);
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .step-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .step-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(79, 172, 254, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(15px);
+        }
+
+        .content-card h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fff9c4, #ffeaa7);
+            border-left: 5px solid #fdcb6e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(253, 203, 110, 0.2);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        /* 新しい年表スタイル */
+        .timeline-vertical {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .timeline-vertical::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #4facfe, #00f2fe);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 80px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 22px;
+            top: 10px;
+            width: 20px;
+            height: 20px;
+            background: #4facfe;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px #4facfe;
+        }
+
+        .timeline-year {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .timeline-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4facfe;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .data-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-item:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .data-value {
+            font-weight: 700;
+            color: #4facfe;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card:hover {
+            border-color: #4facfe;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            display: block;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f1f3f4;
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            border-color: #4facfe;
+            transform: translateY(-3px);
+        }
+
+        .tool-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .efficiency-chart {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #90ee90;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .nav-btn:disabled {
+            background: rgba(108, 117, 125, 0.7);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .welcome-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.5);
+        }
+
+        .summary-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #28a745;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .bilingual {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .source-note {
+            background: rgba(248, 249, 250, 0.95);
+            border-left: 4px solid #4facfe;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        @media (max-width: 768px) {
+            .step-title {
+                font-size: 2.2rem;
+            }
+            .content-card {
+                padding: 20px;
+            }
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
+            .timeline-item {
+                padding-left: 60px;
+            }
+            .timeline-vertical::before {
+                left: 20px;
+            }
+            .timeline-item::before {
+                left: 12px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-background"></div>
+    <div class="floating-emoji emoji-1">🚀</div>
+    <div class="floating-emoji emoji-2">🛸</div>
+    <div class="floating-emoji emoji-3">💫</div>
+    <div class="floating-emoji emoji-4">⭐️</div>
+    <div class="floating-emoji emoji-5">✨</div>
+    
+    <div class="progress-container">
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText" data-ja="生成AI理解Level 0%" data-en="GenAI Understanding Level 0%">生成AI理解Level 0%</div>
+    </div>
+    
+    <div class="language-selector">
+        <button class="language-btn active" data-lang="ja">日本語</button>
+        <button class="language-btn" data-lang="en">English</button>
+    </div>
+
+    <div class="container">
+        <!-- Step 0: Welcome -->
+        <div class="step active" id="step0">
+            <div class="step-header">
+                <h1 class="step-title" data-ja="AIの超概要" data-en="AI Overview">AIの超概要</h1>
+                <p class="step-subtitle" data-ja="歴史から生成AIまで - 段階的に学習しましょう" data-en="From History to Generative AI - Let's learn step by step">歴史から生成AIまで - 段階的に学習しましょう</p>
+            </div>
+            
+            <div class="content-card">
+                <h3 data-ja="ワークショップへようこそ！" data-en="Welcome to the Workshop!">ワークショップへようこそ！</h3>
+                <p data-ja="このワークショップでは、AIの基礎から生成AIの実務活用まで、段階的に学習していきます。各ステップで理解を深めながら進めていきましょう。" data-en="In this workshop, we'll learn step by step from AI basics to practical generative AI applications. Let's deepen understanding at each step.">このワークショップでは、AIの基礎から生成AIの実務活用まで、段階的に学習していきます。各ステップで理解を深めながら進めていきましょう。</p>
+                
+                <h3 data-ja="学習内容" data-en="Learning Content">学習内容</h3>
+                <ul style="margin: 15px 0; padding-left: 25px;">
+                    <li data-ja="生成AIとは何か？" data-en="What is Generative AI?">生成AIとは何か？</li>
+                    <li data-ja="従来AIとの違い" data-en="Differences from Traditional AI">従来AIとの違い</li>
+                    <li data-ja="AIの歴史と発展" data-en="AI History and Development">AIの歴史と発展</li>
+                    <li data-ja="「モデル」の仕組み" data-en="How 'Models' Work">「モデル」の仕組み</li>
+                    <li data-ja="人気ツールの紹介" data-en="Popular Tools Introduction">人気ツールの紹介</li>
+                    <li data-ja="実務での活用方法" data-en="Practical Business Applications">実務での活用方法</li>
+                </ul>
+            </div>
+
+            <div class="welcome-actions">
+                <button class="action-btn" onclick="startLearning()" data-ja="学習を開始" data-en="Start Learning">学習を開始</button>
+            </div>
+        </div>
+
+        <!-- Step 1: What is Generative AI? -->
+        <div class="step" id="step1">
+            <div class="learning-status" data-ja="学習開始！まずは生成AIの基本概念から理解していきます" data-en="Learning starts! First, let's understand the basic concepts of generative AI">学習開始！まずは生成AIの基本概念から理解していきます</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="そもそも生成AIとは？" data-en="What is Generative AI?">そもそも生成AIとは？</h1>
+                <p class="step-subtitle" data-ja="定義から基本概念まで" data-en="From Definition to Basic Concepts">定義から基本概念まで</p>
+            </div>
+            
+            <div class="highlight-box">
+                <strong data-ja="生成AI（Generative AI）の定義" data-en="Definition of Generative AI">生成AI（Generative AI）の定義</strong><br>
+                <span data-ja="学習したデータのパターンを基に、新しいオリジナルコンテンツ（テキスト、画像、音声、動画など）を自動生成するAI技術。従来のAIとは異なり、「創造」と「生成」が可能。" data-en="AI technology that automatically generates new original content (text, images, audio, video, etc.) based on learned data patterns. Unlike traditional AI, it's capable of 'creation' and 'generation'.">学習したデータのパターンを基に、新しいオリジナルコンテンツ（テキスト、画像、音声、動画など）を自動生成するAI技術。従来のAIとは異なり、「創造」と「生成」が可能。</span>
+            </div>
+
+            <div class="content-card">
+                <h3 data-ja="実は定義は未確定" data-en="Definition Still Evolving">実は定義は未確定</h3>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-ja="特徴" data-en="Feature">特徴</th>
+                            <th data-ja="説明" data-en="Description">説明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong data-ja="創造性" data-en="Creativity">創造性</strong></td>
+                            <td><span data-ja="既存データから新しいコンテンツを創造" data-en="Creating new content from existing data">既存データから新しいコンテンツを創造</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="対話性" data-en="Interactivity">対話性</strong></td>
+                            <td><span data-ja="自然言語での指示（プロンプト）に応答" data-en="Responding to natural language instructions (prompts)">自然言語での指示（プロンプト）に応答</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="汎用性" data-en="Versatility">汎用性</strong></td>
+                            <td><span data-ja="様々なタスクに適用可能" data-en="Applicable to various tasks">様々なタスクに適用可能</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="学習能力" data-en="Learning Ability">学習能力</strong></td>
+                            <td><span data-ja="コンテキストから新しいタスクを理解" data-en="Understanding new tasks from context">コンテキストから新しいタスクを理解</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary-box" data-ja="つまり、生成AIは「創造する」AIということですね。従来の「分析する」AIとは根本的に違います。この違いさえ覚えればバッチリです！" data-en="In other words, generative AI is AI that 'creates'. It's fundamentally different from traditional 'analytical' AI. Just remember this difference and you're all set!">つまり、生成AIは「創造する」AIということですね。従来の「分析する」AIとは根本的に違います。この違いさえ覚えればバッチリです！</div>
+        </div>
+
+        <!-- Step 2: Differences from Traditional AI -->
+        <div class="step" id="step2">
+            <div class="learning-status" data-ja="基本概念完了！次は従来AIとの違いを明確にしていきます" data-en="Basic concepts complete! Next, let's clarify the differences from traditional AI">基本概念完了！次は従来AIとの違いを明確にしていきます</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="今と昔の"AI"何が違う？" data-en="What's Different About Today's AI?">今と昔の"AI"何が違う？</h1>
+                <p class="step-subtitle" data-ja="従来AIと生成AIの根本的な違い" data-en="Fundamental Differences Between Traditional and Generative AI">従来AIと生成AIの根本的な違い</p>
+            </div>
+
+            <div class="content-card">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-ja="比較項目" data-en="Comparison">比較項目</th>
+                            <th data-ja="従来AI" data-en="Traditional AI">従来AI</th>
+                            <th data-ja="生成AI" data-en="Generative AI">生成AI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong data-ja="主要機能" data-en="Primary Function">主要機能</strong></td>
+                            <td><span data-ja="分類・判別・予測" data-en="Classification, discrimination, prediction">分類・判別・予測</span></td>
+                            <td><span data-ja="生成・創造・対話" data-en="Generation, creation, conversation">生成・創造・対話</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="使用方法" data-en="Usage">使用方法</strong></td>
+                            <td><span data-ja="プログラミング必須" data-en="Programming required">プログラミング必須</span></td>
+                            <td><span data-ja="自然言語で指示" data-en="Natural language instructions">自然言語で指示</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="出力" data-en="Output">出力</strong></td>
+                            <td><span data-ja="分類ラベル・数値" data-en="Labels, numerical values">分類ラベル・数値</span></td>
+                            <td><span data-ja="文章・画像・音声" data-en="Text, images, audio">文章・画像・音声</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="活用例" data-en="Use Cases">活用例</strong></td>
+                            <td><span data-ja="スパム検出、画像分類" data-en="Spam detection, image classification">スパム検出、画像分類</span></td>
+                            <td><span data-ja="文書作成、創作活動" data-en="Document creation, creative work">文書作成、創作活動</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title" data-ja="業務で使える理由：アクセシビリティの向上" data-en="Why It Works in Business: Improved Accessibility">業務で使える理由：アクセシビリティの向上</div>
+                <ul class="data-list">
+                    <li class="data-item">
+                        <span class="data-label" data-ja="従来AI：プログラミング知識必要" data-en="Traditional AI: Programming knowledge required">従来AI：プログラミング知識必要</span>
+                        <span class="data-value" data-ja="5-10%" data-en="5-10%">5-10%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="生成AI：自然言語で操作可能" data-en="Generative AI: Natural language operation">生成AI：自然言語で操作可能</span>
+                        <span class="data-value" data-ja="85-90%" data-en="85-90%">85-90%</span>
+                    </li>
+                </ul>
+                <div class="source-note">
+                    <strong data-ja="データソース" data-en="Data Source">データソース</strong>: <span data-ja="MIT Technology Review (2024年), Nielsen Norman Group調査" data-en="MIT Technology Review (2024), Nielsen Norman Group survey">MIT Technology Review (2024年), Nielsen Norman Group調査</span>
+                </div>
+            </div>
+
+            <div class="summary-box" data-ja="つまり、生成AIは誰でも使えるAIということですね。プログラミング不要、汎用性、即座の適用、継続学習、この4つが革命的なポイントです！" data-en="In other words, generative AI is AI that anyone can use. No programming required, versatility, immediate application, continuous learning - these 4 points are revolutionary!">つまり、生成AIは誰でも使えるAIということですね。プログラミング不要、汎用性、即座の適用、継続学習、この4つが革命的なポイントです！</div>
+        </div>
+
+        <!-- Step 3: AI History -->
+        <div class="step" id="step3">
+            <div class="learning-status" data-ja="従来AIとの違いを理解完了！次は75年のAI歴史を学びます" data-en="Understanding differences complete! Next, let's learn 75 years of AI history">従来AIとの違いを理解完了！次は75年のAI歴史を学びます</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="AIの歴史 - 現在のブームまで" data-en="AI History - To Current Boom">AIの歴史 - 現在のブームまで</h1>
+                <p class="step-subtitle" data-ja="75年の技術蓄積が2022年に開花" data-en="75 Years of Technology Culminating in 2022">75年の技術蓄積が2022年に開花</p>
+            </div>
+
+            <div class="content-card">
+                <div class="timeline-vertical">
+                    <div class="timeline-item">
+                        <div class="timeline-year" data-ja="1950年代" data-en="1950s">1950年代</div>
+                        <div class="timeline-title" data-ja="AI誕生" data-en="AI Birth">AI誕生</div>
+                        <div class="timeline-content" data-ja="アラン・チューリングがチューリングテストを提案。ダートマス会議で「人工知能」という用語が誕生。" data-en="Alan Turing proposes the Turing Test. The term 'Artificial Intelligence' is coined at the Dartmouth Conference.">アラン・チューリングがチューリングテストを提案。ダートマス会議で「人工知能」という用語が誕生。</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year" data-ja="1980年代" data-en="1980s">1980年代</div>
+                        <div class="timeline-title" data-ja="専門家システム" data-en="Expert Systems">専門家システム</div>
+                        <div class="timeline-content" data-ja="特定分野の知識を蓄積したAIシステムが実用化。医療診断や金融分析に活用される。" data-en="AI systems with specialized domain knowledge are put into practical use for medical diagnosis and financial analysis.">特定分野の知識を蓄積したAIシステムが実用化。医療診断や金融分析に活用される。</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year">1997年</div>
+                        <div class="timeline-title" data-ja="Deep Blue勝利" data-en="Deep Blue Victory">Deep Blue勝利</div>
+                        <div class="timeline-content" data-ja="IBMのDeep Blueがチェス世界チャンピオンのガルリ・カスパロフに勝利。AIの可能性を世界に示す。" data-en="IBM's Deep Blue defeats world chess champion Garry Kasparov, demonstrating AI's potential to the world.">IBMのDeep Blueがチェス世界チャンピオンのガルリ・カスパロフに勝利。AIの可能性を世界に示す。</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year">2012年</div>
+                        <div class="timeline-title" data-ja="ディープラーニング革命" data-en="Deep Learning Revolution">ディープラーニング革命</div>
+                        <div class="timeline-content" data-ja="ImageNetコンペティションでAlexNetが圧勝。画像認識精度が劇的に向上し、AIブームが再燃。" data-en="AlexNet dominates the ImageNet competition, dramatically improving image recognition accuracy and reigniting the AI boom.">ImageNetコンペティションでAlexNetが圧勝。画像認識精度が劇的に向上し、AIブームが再燃。</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year">2017年</div>
+                        <div class="timeline-title" data-ja="Transformer登場" data-en="Transformer Architecture">Transformer登場</div>
+                        <div class="timeline-content" data-ja="Googleが「Attention Is All You Need」論文を発表。現在のChatGPT、Gemini等の基盤技術となる。" data-en="Google publishes 'Attention Is All You Need' paper, becoming the foundation for current ChatGPT, Gemini, etc.">Googleが「Attention Is All You Need」論文を発表。現在のChatGPT、Gemini等の基盤技術となる。</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year" data-ja="2022年11月" data-en="Nov 2022">2022年11月</div>
+                        <div class="timeline-title" data-ja="ChatGPT衝撃" data-en="ChatGPT Impact">ChatGPT衝撃</div>
+                        <div class="timeline-content" data-ja="OpenAIがChatGPTを公開。2ヶ月で1億ユーザー突破、史上最速の普及を記録。生成AIが一般化。" data-en="OpenAI releases ChatGPT, reaching 100 million users in 2 months - the fastest adoption in history. Generative AI becomes mainstream.">OpenAIがChatGPTを公開。2ヶ月で1億ユーザー突破、史上最速の普及を記録。生成AIが一般化。</div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-year" data-ja="2025年現在" data-en="Present 2025">2025年現在</div>
+                        <div class="timeline-title" data-ja="業務活用時代" data-en="Business Application Era">業務活用時代</div>
+                        <div class="timeline-content" data-ja="Fortune 500企業の75%が生成AIを導入。日本でもDX推進の中核技術として位置づけられる。" data-en="75% of Fortune 500 companies have adopted generative AI. In Japan, it's positioned as core technology for digital transformation.">Fortune 500企業の75%が生成AIを導入。日本でもDX推進の中核技術として位置づけられる。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-box" data-ja="つまり、現在の生成AIは75年間の技術蓄積の結果ということですね。2017年のTransformer技術、2022年のChatGPT登場が転換点でした！" data-en="In other words, current generative AI is the result of 75 years of technological accumulation. The 2017 Transformer technology and 2022 ChatGPT launch were turning points!">つまり、現在の生成AIは75年間の技術蓄積の結果ということですね。2017年のTransformer技術、2022年のChatGPT登場が転換点でした！</div>
+        </div>
+
+        <!-- Step 4: What is a Model? -->
+        <div class="step" id="step4">
+            <div class="learning-status" data-ja="AI歴史の理解完了！次はAIの「脳」である「モデル」の仕組みを学びます" data-en="AI history understanding complete! Next, let's learn about 'models', the 'brain' of AI">AI歴史の理解完了！次はAIの「脳」である「モデル」の仕組みを学びます</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="「モデル」ってなに？どんな仕組み？" data-en="What is a 'Model'? How Does it Work?">「モデル」ってなに？どんな仕組み？</h1>
+                <p class="step-subtitle" data-ja="AIの「脳」の仕組みを理解しよう" data-en="Understanding the Mechanism of AI's 'Brain'">AIの「脳」の仕組みを理解しよう</p>
+            </div>
+            
+            <div class="highlight-box">
+                <strong data-ja="AIモデルの基本概念" data-en="Basic Concept of AI Models">AIモデルの基本概念</strong><br>
+                <span data-ja="モデルとは、大量のデータから「パターン」を学習した結果です。人間の「経験則」や「勘」をコンピュータで再現したものと考えると理解しやすいでしょう。" data-en="A model is the result of learning 'patterns' from large amounts of data - like recreating human 'experience' and 'intuition' in computers.">モデルとは、大量のデータから「パターン」を学習した結果です。人間の「経験則」や「勘」をコンピュータで再現したものと考えると理解しやすいでしょう。</span>
+            </div>
+
+            <div class="content-card">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">1.8兆</span>
+                        <div class="stat-label" data-ja="GPT-4のパラメータ数（推定）" data-en="Parameters in GPT-4 (estimated)">GPT-4のパラメータ数（推定）</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" data-ja="数十TB" data-en="Tens of TB">数十TB</span>
+                        <div class="stat-label" data-ja="学習データ量" data-en="Training Data Volume">学習データ量</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">45</span>
+                        <div class="stat-label" data-ja="対応言語数（Gemini）" data-en="Supported Languages (Gemini)">対応言語数（Gemini）</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" data-ja="200万" data-en="2M">200万</span>
+                        <div class="stat-label" data-ja="コンテキストウィンドウ（トークン）" data-en="Context Window (Tokens)">コンテキストウィンドウ（トークン）</div>
+                    </div>
+                </div>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-ja="学習ステップ" data-en="Learning Step">学習ステップ</th>
+                            <th data-ja="内容" data-en="Content">内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong data-ja="データ収集" data-en="Data Collection">データ収集</strong></td>
+                            <td><span data-ja="インターネット上の膨大なテキストデータを収集" data-en="Collecting vast text data from the internet">インターネット上の膨大なテキストデータを収集</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="前処理" data-en="Preprocessing">前処理</strong></td>
+                            <td><span data-ja="データをAIが理解できる形式に変換" data-en="Converting data into AI-understandable format">データをAIが理解できる形式に変換</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="学習" data-en="Training">学習</strong></td>
+                            <td><span data-ja="パターンを発見し、次の単語を予測する能力を獲得" data-en="Discovering patterns and acquiring ability to predict next words">パターンを発見し、次の単語を予測する能力を獲得</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="人間フィードバック" data-en="Human Feedback">人間フィードバック</strong></td>
+                            <td><span data-ja="人間の評価に基づいて回答品質を向上" data-en="Improving response quality based on human evaluation">人間の評価に基づいて回答品質を向上</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="推論" data-en="Inference">推論</strong></td>
+                            <td><span data-ja="実際の質問に対して学習した知識を活用して回答" data-en="Using learned knowledge to respond to actual questions">実際の質問に対して学習した知識を活用して回答</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary-box" data-ja="つまり、モデルは人間の脳のようなものということですね。膨大なデータから学習して、パターンを見つけて、新しい質問に答える。これがAIの基本原理です！" data-en="In other words, a model is like a human brain. It learns from vast data, finds patterns, and answers new questions. This is the basic principle of AI!">つまり、モデルは人間の脳のようなものということですね。膨大なデータから学習して、パターンを見つけて、新しい質問に答える。これがAIの基本原理です！</div>
+        </div>
+
+        <!-- Step 5: Popular AI Tools -->
+        <div class="step" id="step5">
+            <div class="learning-status" data-ja="モデルの仕組み理解完了！次は実際に使われているAIツールを学びます" data-en="Model mechanism understanding complete! Next, let's learn about actually used AI tools">モデルの仕組み理解完了！次は実際に使われているAIツールを学びます</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="日本で認知度の高いAIツール" data-en="Popular AI Tools in Japan">日本で認知度の高いAIツール</h1>
+                <p class="step-subtitle" data-ja="実際に使われているツールを知ろう" data-en="Learn About Actually Used Tools">実際に使われているツールを知ろう</p>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title" data-ja="日本でのAI利用状況（2024年調査）" data-en="AI Usage in Japan (2024 Survey)">日本でのAI利用状況（2024年調査）</div>
+                <ul class="data-list">
+                    <li class="data-item">
+                        <span class="data-label" data-ja="ChatGPT認知率" data-en="ChatGPT Awareness">ChatGPT認知率</span>
+                        <span class="data-value">72.3%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="ChatGPT利用率" data-en="ChatGPT Usage">ChatGPT利用率</span>
+                        <span class="data-value">19.8%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="生成AI全体利用率" data-en="GenAI Overall Usage">生成AI全体利用率</span>
+                        <span class="data-value">12.1%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="企業でのAI導入率" data-en="Corporate AI Adoption">企業でのAI導入率</span>
+                        <span class="data-value">38.5%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="AI導入検討中企業" data-en="Companies Considering AI">AI導入検討中企業</span>
+                        <span class="data-value">45.2%</span>
+                    </li>
+                </ul>
+                <div class="source-note">
+                    <strong data-ja="データソース" data-en="Data Source">データソース</strong>: <span data-ja="野村総合研究所（2024年9月調査）、MMD研究所（2024年10月調査）" data-en="Nomura Research Institute (Sep 2024), MMD Laboratory (Oct 2024)">野村総合研究所（2024年9月調査）、MMD研究所（2024年10月調査）</span>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <div class="tool-name">ChatGPT (OpenAI)</div>
+                        <p><strong data-ja="特徴" data-en="Features">特徴</strong>: <span data-ja="最も高い認知度、自然な会話能力" data-en="Highest awareness, natural conversation abilities">最も高い認知度、自然な会話能力</span></p>
+                        <p><strong data-ja="料金" data-en="Pricing">料金</strong>: <span data-ja="無料版 / Plus版 月額20ドル" data-en="Free / Plus $20/month">無料版 / Plus版 月額20ドル</span></p>
+                    </div>
+
+                    <div class="tool-card">
+                        <div class="tool-name">Google Gemini</div>
+                        <p><strong data-ja="特徴" data-en="Features">特徴</strong>: <span data-ja="リアルタイム情報、Google統合" data-en="Real-time info, Google integration">リアルタイム情報、Google統合</span></p>
+                        <p><strong data-ja="料金" data-en="Pricing">料金</strong>: <span data-ja="無料版 / Advancedバージョン 月額19.99ドル" data-en="Free / Advanced $19.99/month">無料版 / Advancedバージョン 月額19.99ドル</span></p>
+                    </div>
+
+                    <div class="tool-card">
+                        <div class="tool-name">Microsoft Copilot</div>
+                        <p><strong data-ja="特徴" data-en="Features">特徴</strong>: <span data-ja="Office統合、企業向け機能" data-en="Office integration, enterprise features">Office統合、企業向け機能</span></p>
+                        <p><strong data-ja="料金" data-en="Pricing">料金</strong>: <span data-ja="Microsoft 365に標準搭載" data-en="Included in Microsoft 365">Microsoft 365に標準搭載</span></p>
+                    </div>
+
+                    <div class="tool-card">
+                        <div class="tool-name">Claude (Anthropic)</div>
+                        <p><strong data-ja="特徴" data-en="Features">特徴</strong>: <span data-ja="安全性重視、長文処理" data-en="Safety-focused, long documents">安全性重視、長文処理</span></p>
+                        <p><strong data-ja="料金" data-en="Pricing">料金</strong>: <span data-ja="2025年秋日本語版リリース予定" data-en="Japanese release Fall 2025">2025年秋日本語版リリース予定</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-box" data-ja="つまり、現在は複数のAIツールが競合している状況ということですね。ChatGPT、Gemini、Copilot、Claude、それぞれに特徴があります！" data-en="In other words, multiple AI tools are currently competing. ChatGPT, Gemini, Copilot, Claude - each has its own characteristics!">つまり、現在は複数のAIツールが競合している状況ということですね。ChatGPT、Gemini、Copilot、Claude、それぞれに特徴があります！</div>
+        </div>
+
+        <!-- Step 6: Business Applications -->
+        <div class="step" id="step6">
+            <div class="learning-status" data-ja="AIツールの理解完了！最後に実務での活用方法を学びます" data-en="AI tools understanding complete! Finally, let's learn practical business applications">AIツールの理解完了！最後に実務での活用方法を学びます</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="実務にどう活かせるの？" data-en="How to Apply in Real Business?">実務にどう活かせるの？</h1>
+                <p class="step-subtitle" data-ja="具体的な効率化事例と成果" data-en="Specific Efficiency Examples and Results">具体的な効率化事例と成果</p>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title" data-ja="実証済み効率化効果" data-en="Proven Efficiency Effects">実証済み効率化効果</div>
+                <ul class="data-list">
+                    <li class="data-item">
+                        <span class="data-label" data-ja="メール処理時間削減" data-en="Email Processing Reduction">メール処理時間削減</span>
+                        <span class="data-value">64%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="文書作成時間削減" data-en="Document Creation Reduction">文書作成時間削減</span>
+                        <span class="data-value">75%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="レポート作成時間削減" data-en="Report Creation Reduction">レポート作成時間削減</span>
+                        <span class="data-value">90%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="会議準備時間削減" data-en="Meeting Prep Reduction">会議準備時間削減</span>
+                        <span class="data-value">75%</span>
+                    </li>
+                    <li class="data-item">
+                        <span class="data-label" data-ja="コード記述速度向上" data-en="Coding Speed Improvement">コード記述速度向上</span>
+                        <span class="data-value">55%</span>
+                    </li>
+                </ul>
+                <div class="source-note">
+                    <strong data-ja="データソース" data-en="Data Sources">データソース</strong>: <span data-ja="Nielsen Norman Group（2024年調査）、McKinsey Global Institute（2024年）、GitHub Copilot実証実験結果" data-en="Nielsen Norman Group (2024 survey), McKinsey Global Institute (2024), GitHub Copilot pilot results">Nielsen Norman Group（2024年調査）、McKinsey Global Institute（2024年）、GitHub Copilot実証実験結果</span>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-ja="日本企業" data-en="Japanese Company">日本企業</th>
+                            <th data-ja="導入効果" data-en="Implementation Effect">導入効果</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong data-ja="三菱UFJ銀行" data-en="MUFG Bank">三菱UFJ銀行</strong></td>
+                            <td><span data-ja="月22万時間の労働削減効果を試算" data-en="Calculated 220,000 hours monthly labor reduction">月22万時間の労働削減効果を試算</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="みずほ銀行" data-en="Mizuho Bank">みずほ銀行</strong></td>
+                            <td><span data-ja="稟議資料作成時間を92%削減（2時間→10分）" data-en="92% reduction in approval docs (2 hours→10 min)">稟議資料作成時間を92%削減（2時間→10分）</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="セブンイレブン" data-en="7-Eleven">セブンイレブン</strong></td>
+                            <td><span data-ja="商品企画時間を最大90%削減" data-en="Up to 90% reduction in product planning time">商品企画時間を最大90%削減</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="住友商事" data-en="Sumitomo Corporation">住友商事</strong></td>
+                            <td><span data-ja="8,800名にMicrosoft Copilot全社導入" data-en="Company-wide Copilot for 8,800 employees">8,800名にMicrosoft Copilot全社導入</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="ソフトバンク" data-en="SoftBank">ソフトバンク</strong></td>
+                            <td><span data-ja="社内文書作成業務の70%をAI化" data-en="70% of internal document creation automated">社内文書作成業務の70%をAI化</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary-box" data-ja="つまり、AIは実際にビジネスで大きな効果を出しているということですね。メール、文書、レポート、会議準備で60-90%の効率化が可能です！" data-en="In other words, AI is actually producing significant effects in business. 60-90% efficiency improvement is possible for email, documents, reports, and meeting preparation!">つまり、AIは実際にビジネスで大きな効果を出しているということですね。メール、文書、レポート、会議準備で60-90%の効率化が可能です！</div>
+        </div>
+
+        <!-- Step 7: Summary -->
+        <div class="step" id="step7">
+            <div class="learning-status" data-ja="学習完了！生成AIマスターです。お疲れさまでした！" data-en="Learning complete! You're a generative AI master. Great job!">学習完了！生成AIマスターです。お疲れさまでした！</div>
+            
+            <div class="step-header">
+                <h1 class="step-title" data-ja="まとめ" data-en="Summary">まとめ</h1>
+                <p class="step-subtitle" data-ja="学習の振り返りと次のステップ" data-en="Learning Review and Next Steps">学習の振り返りと次のステップ</p>
+            </div>
+
+            <div class="efficiency-chart">
+                <h3 data-ja="Workshopの学習成果" data-en="Workshop Learning Outcomes">Workshopの学習成果</h3>
+                <p data-ja="本日学んだAIの基礎知識を活用して、明日から業務効率化を始めましょう！" data-en="Let's start improving work efficiency from tomorrow using the AI foundational knowledge learned today!">本日学んだAIの基礎知識を活用して、明日から業務効率化を始めましょう！</p>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-ja="学習項目" data-en="Learning Items">学習項目</th>
+                            <th data-ja="習得したポイント" data-en="Key Points Acquired">習得したポイント</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong data-ja="生成AIの定義" data-en="GenAI Definition">生成AIの定義</strong></td>
+                            <td><span data-ja="創造するAI vs 分析するAI（従来型）の違いを理解" data-en="Understanding the difference between creative AI vs analytical AI (traditional)">創造するAI vs 分析するAI（従来型）の違いを理解</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="アクセシビリティ" data-en="Accessibility">アクセシビリティ</strong></td>
+                            <td><span data-ja="プログラミング不要で85-90%の人が利用可能" data-en="85-90% of people can use it without programming">プログラミング不要で85-90%の人が利用可能</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="技術的背景" data-en="Technical Background">技術的背景</strong></td>
+                            <td><span data-ja="75年の技術蓄積、2017年Transformer、2022年ChatGPT" data-en="75 years of tech accumulation, 2017 Transformer, 2022 ChatGPT">75年の技術蓄積、2017年Transformer、2022年ChatGPT</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="ツール比較" data-en="Tool Comparison">ツール比較</strong></td>
+                            <td><span data-ja="ChatGPT、Gemini、Copilot、Claudeの特徴と選び方" data-en="Features and selection criteria for ChatGPT, Gemini, Copilot, Claude">ChatGPT、Gemini、Copilot、Claudeの特徴と選び方</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="実務効果" data-en="Business Impact">実務効果</strong></td>
+                            <td><span data-ja="メール64%、文書75%、レポート90%の時間削減が実証済み" data-en="Proven time savings: 64% emails, 75% documents, 90% reports">メール64%、文書75%、レポート90%の時間削減が実証済み</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="content-card">
+                <h3 data-ja="次のアクションプラン" data-en="Next Action Plan">次のアクションプラン</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th data-ja="ステップ" data-en="Step">ステップ</th>
+                            <th data-ja="具体的なアクション" data-en="Specific Actions">具体的なアクション</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong data-ja="今週中" data-en="This Week">今週中</strong></td>
+                            <td><span data-ja="まずは日常的なメール・文書作成でAI活用を開始" data-en="Start AI utilization with daily email and document creation">まずは日常的なメール・文書作成でAI活用を開始</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="来月まで" data-en="Next Month">来月まで</strong></td>
+                            <td><span data-ja="効果的なプロンプト技法を習得して活用度を向上" data-en="Master effective prompting techniques to improve utilization">効果的なプロンプト技法を習得して活用度を向上</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong data-ja="3ヶ月後" data-en="3 Months">3ヶ月後</strong></td>
+                            <td><span data-ja="チーム・部署での成功事例を共有し、組織全体の生産性向上へ" data-en="Share success stories for organization-wide productivity improvement">チーム・部署での成功事例を共有し、組織全体の生産性向上へ</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="source-note">
+                <strong data-ja="参考文献" data-en="References">参考文献</strong>:<br>
+                • Nielsen Norman Group "AI Improves Employee Productivity by 66%" (2024)<br>
+                • McKinsey Global Institute "The Economic Potential of Generative AI" (2024)<br>
+                • <span data-ja="野村総合研究所「日本のChatGPT利用動向」(2024年9月)" data-en="Nomura Research Institute 'Japan ChatGPT Usage Trends' (Sep 2024)">野村総合研究所「日本のChatGPT利用動向」(2024年9月)</span><br>
+                • Google DeepMind "Gemini Models Documentation" (2024)<br>
+                • GitHub "The Impact of GitHub Copilot on Productivity" (2024)
+            </div>
+
+            <div class="summary-box" data-ja="つまり、生成AIは新しいビジネスパートナーということですね。75年の技術蓄積、実証済みの効率化効果、今が導入の最適タイミングです！" data-en="In other words, generative AI is a new business partner. 75 years of technology accumulation, proven efficiency effects, now is the optimal time for adoption!">つまり、生成AIは新しいビジネスパートナーということですね。75年の技術蓄積、実証済みの効率化効果、今が導入の最適タイミングです！</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation" id="navigation" style="display: none;">
+            <button class="nav-btn" id="prevBtn" onclick="changeStep(-1)" disabled data-ja="前へ" data-en="Previous">前へ</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeStep(1)" data-ja="次へ" data-en="Next">次へ</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStepIndex = 0;
+        let currentLanguage = 'ja';
+        const totalSteps = 8;
+        const progressTexts = {
+            ja: [
+                '生成AI理解Level 0%',
+                '生成AI理解Level 14%',
+                '生成AI理解Level 28%', 
+                '生成AI理解Level 42%',
+                '生成AI理解Level 57%',
+                '生成AI理解Level 71%',
+                '生成AI理解Level 85%',
+                '生成AI理解Level 100% - マスター！'
+            ],
+            en: [
+                'GenAI Understanding Level 0%',
+                'GenAI Understanding Level 14%',
+                'GenAI Understanding Level 28%',
+                'GenAI Understanding Level 42%',
+                'GenAI Understanding Level 57%',
+                'GenAI Understanding Level 71%',
+                'GenAI Understanding Level 85%',
+                'GenAI Understanding Level 100% - Master!'
+            ]
+        };
+
+        // Language switching
+        document.querySelectorAll('.language-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const lang = this.dataset.lang;
+                switchLanguage(lang);
+            });
+        });
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update language buttons
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update all text content
+            document.querySelectorAll('[data-ja]').forEach(element => {
+                const text = element.getAttribute(`data-${lang}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
+
+            // Update progress text
+            updateProgressText();
+            
+            // Update navigation buttons
+            updateNavigationText();
+        }
+
+        function updateProgressText() {
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = progressTexts[currentLanguage][currentStepIndex];
+        }
+
+        function updateNavigationText() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (currentLanguage === 'ja') {
+                prevBtn.textContent = '前へ';
+                if (currentStepIndex === totalSteps - 1) {
+                    nextBtn.textContent = '完了';
+                    nextBtn.onclick = function() { goToTop(); };
+                } else {
+                    nextBtn.textContent = '次へ';
+                    nextBtn.onclick = function() { changeStep(1); };
+                }
+            } else {
+                prevBtn.textContent = 'Previous';
+                if (currentStepIndex === totalSteps - 1) {
+                    nextBtn.textContent = 'Complete';
+                    nextBtn.onclick = function() { goToTop(); };
+                } else {
+                    nextBtn.textContent = 'Next';
+                    nextBtn.onclick = function() { changeStep(1); };
+                }
+            }
+        }
+
+        function goToTop() {
+            // Hide current step
+            document.getElementById(`step${currentStepIndex}`).classList.remove('active');
+            
+            // Reset to step 0 (top page)
+            currentStepIndex = 0;
+            document.getElementById('step0').classList.add('active');
+            
+            updateNavigation();
+            updateProgressBar();
+            updateProgressText();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Step navigation
+        function changeStep(direction) {
+            const newStepIndex = currentStepIndex + direction;
+            
+            if (newStepIndex >= 0 && newStepIndex < totalSteps) {
+                // Hide current step
+                document.getElementById(`step${currentStepIndex}`).classList.remove('active');
+                
+                // Show new step
+                currentStepIndex = newStepIndex;
+                document.getElementById(`step${currentStepIndex}`).classList.add('active');
+                
+                // Update navigation
+                updateNavigation();
+                updateProgressBar();
+                updateProgressText();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Add level up animation
+                if (direction > 0) {
+                    showLevelUpAnimation();
+                }
+            }
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const navigation = document.getElementById('navigation');
+            
+            // Show navigation for steps 1-7, hide for step 0
+            if (currentStepIndex === 0) {
+                navigation.style.display = 'none';
+            } else {
+                navigation.style.display = 'flex';
+            }
+            
+            // Fix: Allow going back to step 0 from step 1
+            prevBtn.disabled = currentStepIndex <= 0;
+            nextBtn.disabled = false;
+            
+            updateNavigationText();
+        }
+
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            const progress = (currentStepIndex / (totalSteps - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showLevelUpAnimation() {
+            const progressContainer = document.querySelector('.progress-container');
+            progressContainer.style.animation = 'pulse 0.6s ease-in-out';
+            setTimeout(() => {
+                progressContainer.style.animation = '';
+            }, 600);
+        }
+
+        function startLearning() {
+            changeStep(1);
+        }
+
+        function restartLearning() {
+            // Hide current step
+            document.getElementById(`step${currentStepIndex}`).classList.remove('active');
+            
+            // Reset to step 0
+            currentStepIndex = 0;
+            document.getElementById('step0').classList.add('active');
+            
+            updateNavigation();
+            updateProgressBar();
+            updateProgressText();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (currentStepIndex === 0) return; // No keyboard nav on welcome screen
+            
+            if (event.key === 'ArrowLeft' && currentStepIndex > 0) {
+                changeStep(-1);
+            } else if (event.key === 'ArrowRight' && currentStepIndex < totalSteps - 1) {
+                changeStep(1);
+            }
+        });
+
+        // Initialize
+        updateNavigation();
+        updateProgressBar();
+        updateProgressText();
+        
+        // Add pulse animation to progress bar
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Smooth animations for step transitions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fade in animation for active step
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.step').forEach(step => {
+                observer.observe(step);
+            });
+        });
+    </script>
+</body>
+</html>。お疲れさまでした！" data-en="Learning complete! You're a generative AI master. Great job!">学習完了！生成AIマスターです
